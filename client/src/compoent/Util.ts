@@ -1,0 +1,118 @@
+import { AnyMapgen, Mapgen, OverMapSpecial, OvermapTerrainID, TerrainID } from "cdda-schema";
+import { CHUNK_SIZE, GVar } from "./GlobalContext";
+import { GameDataTable } from "../static/DataLoader";
+import { ChunkSlotDataMap } from "./TileMap/Chunk";
+import { ZoneChunkDataMap } from "./TileMap";
+import { TilesetData } from "../static/TilesetLoader";
+
+
+
+/**预处理omterrain */
+export const remapOMTerrainID = (mapgen:AnyMapgen[])=>{
+    const rmap = GVar.omterrainIDMap ??= {};
+    mapgen.filter(t=>'om_terrain' in t)
+        .forEach(t => {
+            const fixt = t as Mapgen;
+            const omlist = typeof fixt.om_terrain == 'string'
+                ? [fixt.om_terrain] : fixt.om_terrain.flat(Infinity);
+            //if(omlist.includes('p_resort_1ne')) console.log('includes(p_resort_1ne)');
+            omlist.forEach(id => rmap[id as string]=fixt);
+        });
+}
+/**获取 overmap special 地图大小 */
+export const getOMSSize = (oms:OverMapSpecial)=>{
+    const size = {
+        minChunkX:0,
+        maxChunkX:0,
+        minChunkY:0,
+        maxChunkY:0,
+        minChunkZ:0,
+        maxChunkZ:0,
+    }
+    oms.overmaps.forEach(o=>{
+        const [x,y,z] = o.point;
+        size.maxChunkX = Math.max(x,size.maxChunkX);
+        size.minChunkX = Math.min(x,size.minChunkX);
+        size.maxChunkY = Math.max(y,size.maxChunkY);
+        size.minChunkY = Math.min(y,size.minChunkY);
+        size.maxChunkZ = Math.max(z,size.maxChunkZ);
+        size.minChunkZ = Math.min(z,size.minChunkZ);
+    });
+    return size;
+};
+
+/**将omtid转为ChunkSlotData */
+export const getChunkSlotData = (id:OvermapTerrainID,gd:GameDataTable,td:TilesetData):ChunkSlotDataMap|undefined=>{
+    if(GVar.omterrainIDMap ==null) return;
+    const fulldata = GVar.omterrainIDMap;
+    const dat = fulldata[id];
+    if(dat==null) return;
+    const inMapPos = {x:0,y:0};
+    if(typeof dat.om_terrain != 'string'){
+        const ylength = Array.isArray(dat.om_terrain[0])
+            ? dat.om_terrain[0].length : dat.om_terrain.length;
+
+        const list = dat.om_terrain.flat(Infinity);
+        const i = list.indexOf(id);
+        inMapPos.y = Math.floor(i/ylength);
+        inMapPos.x = i%ylength;
+    }
+
+    const charMap = dat.object.rows;
+    const yslice = charMap.slice(inMapPos.y*CHUNK_SIZE.height,(inMapPos.y+1)*CHUNK_SIZE.height);
+    const overslice = yslice.map(s=>s.slice(inMapPos.x*CHUNK_SIZE.width,(inMapPos.x+1)*CHUNK_SIZE.width));
+
+    const palettes = dat.object.palettes
+        ? dat.object.palettes.map(pid=>gd.Palette[pid])
+        : [];
+    const terrainPalettes = palettes.map(p=>{
+        if(p==null) return {};
+        if(p.terrain==null) return {};
+        return p.terrain;
+    });
+    const terrainMap:typeof terrainPalettes[number] = Object.assign({},...terrainPalettes,dat.object.terrain??{});
+
+    const fill = dat.object.fill_ter;
+    const outmap:ChunkSlotDataMap = {};
+    for(let y=0;y<overslice.length;y++){
+        const row = overslice[y];
+        for(let x=0;x<row.length;x++){
+            const char = row[x];
+            const mapc = terrainMap[char];
+            if(mapc==null){
+                if(fill==null) continue;
+                outmap[`${x}_${y}`] = {terrain:td.table[fill]};
+                continue;
+            }
+            const tid = typeof mapc == 'string'
+                ? mapc
+                : typeof mapc[0] == 'string'
+                    ? mapc[0]
+                    : mapc[0][0];
+            outmap[`${x}_${y}`] = {terrain:td.table[tid]};
+        }
+    }
+    return outmap;
+}
+
+/**将omsid转为ZoneChunkData */
+export const getZoneChunkData = (id:OvermapTerrainID,gd:GameDataTable,td:TilesetData):ZoneChunkDataMap|undefined=>{
+    const oms = gd.OvermapSpecial[id];
+    if(oms==null) return;
+    const omslist = oms.overmaps;
+    const outmap:ZoneChunkDataMap={};
+    omslist.forEach(o=>{
+        const [x,y,z] = o.point;
+        if(z!=0) return;
+        const oidWd = o.overmap;
+        const match = oidWd.match(/^(.+?)_(north|south|east|west)$/);
+        if(match==null) return;
+        const overmapTerrainID = match[1];
+        const direction = match[2];
+        outmap[`${x}_${y}_${z}`] = getChunkSlotData(overmapTerrainID,gd,td);
+        //console.log(overmapTerrainID)
+        //console.log(`${x}_${y}`)
+        //console.log(outmap[`${x}_${y}`])
+    });
+    return outmap;
+}

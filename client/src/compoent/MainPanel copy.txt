@@ -1,0 +1,103 @@
+import { CSSProperties, forwardRef, memo, ReactNode, Ref, useCallback, useContext, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { ZoneChunkDataMap, ZoneMap, ZoneMapData } from "./TileMap";
+import { GVar } from "./GlobalContext";
+
+const styled:CSSProperties={};
+
+export type MainPanel = {
+    handleMouseDown:(e: React.MouseEvent)=>void;
+    handleMouseMove:(e: React.MouseEvent)=>void;
+    handleMouseUp:(e: React.MouseEvent)=>void;
+    handleWheel:(e: React.WheelEvent)=>void;
+    initMap:(data:ZoneMapData,map?:ZoneChunkDataMap)=>void;
+}
+export const MainPanel = memo(forwardRef((props:{},ref:Ref<MainPanel>)=>{
+    const mapRef = useRef<ZoneMap|null>(null);
+
+    //#region 拖曳
+    const [dragging, setDragging] = useState(false);
+    const [brushing, setBrushing] = useState(false);
+    const [offset, setOffset] = useState({ x: 0, y: 0 });
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+    const [scale, setScale] = useState(1);
+
+    const inBrush = useCallback((e: React.MouseEvent)=>{
+        if(!GVar.currentTile) return;
+        const pos = GVar.currentTile.getPos();
+        //mapRef.current?.setTile('rock',pos.x,pos.y);
+        const bid = GVar.brusnId=="null" ? null
+            : GVar.brusnId ?? null;
+        const cdat=GVar.currentTile.getData();
+        if((cdat === null && bid === null )) return;
+        if((cdat?.tileId !== bid))
+            mapRef.current?.setSlot(bid,pos.x,pos.y);
+    },[mapRef.current])
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        if (e.button === 2) {
+            setDragging(true);
+            setOffset({ x: e.clientX/scale - position.x, y: e.clientY/scale - position.y });
+        }
+    };
+    const handleMouseDownSelf = (e: React.MouseEvent)=>{
+        if(e.button === 0){
+            e.preventDefault();
+            setBrushing(true);
+            inBrush(e);
+        }
+    }
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (dragging) {
+            e.preventDefault();
+            const x = e.clientX / scale - offset.x;
+            const y = e.clientY / scale - offset.y;
+            setPosition({ x, y });
+        }
+        if(brushing){
+            e.preventDefault();
+            inBrush(e);
+        }
+    };
+    const handleMouseUp = () => {
+        setDragging(false);
+        setBrushing(false);
+    };
+    const handleWheel = (e: React.WheelEvent) => {
+        setScale(prevScale =>
+            Math.min(Math.max(0.2, prevScale + e.deltaY * -0.001), 5)
+        );
+    };
+    const dragStyle:CSSProperties = {
+        ...styled,
+        transform: `translate(${position.x}px, ${position.y}px)`,
+        scale:`${scale}`
+    }
+    //#endregion
+
+    //#region 初始化
+    const [zoneMap, setZoneMap] = useState<ReactNode|null>(null);
+    const initMap = useCallback((data:ZoneMapData,map?:ZoneChunkDataMap)=>{
+        console.log('initMap')
+        setZoneMap(null);
+        setTimeout(()=>setZoneMap(<ZoneMap
+            ref={mapRef}
+            data={data}
+            chunkDataMap={map}
+        />),0);
+    },[]);
+    //#endregion
+
+    const localRef = {
+        handleMouseDown,handleMouseMove,handleMouseUp,handleWheel,initMap
+    };
+    useImperativeHandle(ref,()=>localRef);
+    GVar.mainPanel=localRef;
+    console.log('rendering MainPanel')
+
+    return(
+        <div style={dragStyle}
+            onMouseDown={handleMouseDownSelf}
+        >{zoneMap}
+        </div>
+    )
+}));
