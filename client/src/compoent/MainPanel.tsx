@@ -12,6 +12,7 @@ const styled:CSSProperties={
 export type PIXIApp = PIXI.Application<PIXI.Renderer>;
 export type MainPanel = {
     initMap:(data:ZoneMapData,map?:ZoneChunkDataMap)=>void;
+    changeZ:(z:number)=>Promise<void>;
 }
 export const MainPanel = memo(forwardRef((props:{},ref:Ref<MainPanel>)=>{
     const {tilesetData} = useContext(GlobalContext);
@@ -125,6 +126,9 @@ export const MainPanel = memo(forwardRef((props:{},ref:Ref<MainPanel>)=>{
             console.timeEnd('initMap');
         })();
     },[vp,tilesetData]);
+    const changeZ = useCallback(async (z:number)=>{
+        await zoneMap?.init(z);
+    },[zoneMap]);
     //#endregion
     useEffect(()=>{
         if (!vp) return;
@@ -139,7 +143,7 @@ export const MainPanel = memo(forwardRef((props:{},ref:Ref<MainPanel>)=>{
         vp.on('mousemove', handleMouseMove);
         return () => void vp.off('mousemove', handleMouseMove);
     },[vp,inBrushing,zoneMap,hover]);
-    const localRef = {initMap};
+    const localRef = {initMap,changeZ};
     useImperativeHandle(ref,()=>localRef);
     GVar.mainPanel=localRef;
     console.log('rendering MainPanel')

@@ -18,18 +18,6 @@ import { getOMSSize, getZoneChunkData } from "../Util"
 
 
 
-
-const expand = keyframes`
-    from {
-        width: 30%;
-        height: auto;
-    }
-    to {
-      width: 40%; /* 目标宽度 */
-      height: 200px; /* 目标高度 */
-    }
-`;
-
 const StyledToolPanel = css`
     position: fixed;
     right: 0px;
@@ -38,8 +26,6 @@ const StyledToolPanel = css`
     border: 1px solid black;
     z-index: 1000;
     width: 30%;
-    //transition: width 0.3s ease, height 0.3s ease;
-    //animation: {expand} 0.3s ease forwards;
     transition: width 0.3s ease, height 0.3s ease;
     &:hover{
         transition: width 0.3s ease, height 0.3s ease;
@@ -63,21 +49,29 @@ const OMSDescStyled = css`
     width: max(90px, 20%);
 `;
 
+const ZAxisInputStyled = TerrainInputStyled;
+const ZAxisDescStyled = css`
+    width: max(20px, 20%);
+`;
+
 type ToolPanelProps = {}
 
 
 export const ToolPanel:FC<ToolPanelProps> = (props:ToolPanelProps)=>{
     const {} = props;
     const {tilesetData,gameDataTable} = useContext(GlobalContext);
+
+    //#region 地形笔刷输入
     const terrainInputRef = useRef<InputCard>(null);
-    const handleInputSubmit = useCallback(()=>{
+    const handleTerrainSubmit = useCallback(()=>{
         GVar.brusnId = terrainInputRef.current?.getText();
         //console.log(GlobalVarHelper.brusnId);
     },[terrainInputRef]);
+    //#endregion
 
-
+    //#region 地图ID输入
     const omsInputRef = useRef<InputCard>(null);
-    const handleClickOMT = useCallback(()=>{
+    const handleOMTSubmit = useCallback(()=>{
         if(GVar.mainPanel && tilesetData && gameDataTable && omsInputRef.current){
             const omsid = omsInputRef.current.getText();
             const oms = gameDataTable.OvermapSpecial[omsid];
@@ -99,12 +93,28 @@ export const ToolPanel:FC<ToolPanelProps> = (props:ToolPanelProps)=>{
             },getZoneChunkData(omsid,gameDataTable,tilesetData));
         }
     },[tilesetData]);
+    //#endregion
+
+    //#region Z轴输入
+    const zAxisInputRef = useRef<InputCard>(null);
+    const handleZAxisInputSubmit = useCallback(()=>{
+        if(zAxisInputRef.current==null) return;
+        const num = Number(zAxisInputRef.current?.getText());
+        if(isNaN(num) || num ==null) return;
+        const mainPanel = GVar.mainPanel;
+        if(mainPanel==null) return;
+        mainPanel.changeZ(num);
+    },[zAxisInputRef]);
+    //#endregion
+
+
+
     console.log('rendering ToolPanel')
 
     return(<Card cardStyle={StyledToolPanel}>
         <InputCard
             desc="Terrain ID"
-            onClick={handleInputSubmit}
+            onClick={handleTerrainSubmit}
             initialText='null'
             overlayStyle={TerrainInputStyled}
             descStyle={TerrainDescStyled}
@@ -112,11 +122,19 @@ export const ToolPanel:FC<ToolPanelProps> = (props:ToolPanelProps)=>{
         />
         <InputCard
             desc="Overmap Special ID"
-            onClick={handleClickOMT}
+            onClick={handleOMTSubmit}
             initialText='null'
             overlayStyle={OMSInputStyled}
             descStyle={OMSDescStyled}
             ref={omsInputRef}
+        />
+        <InputCard
+            desc="Z-Axis"
+            onClick={handleZAxisInputSubmit}
+            initialText='0'
+            overlayStyle={ZAxisInputStyled}
+            descStyle={ZAxisDescStyled}
+            ref={zAxisInputRef}
         />
         <TipsPanel/>
     </Card>)

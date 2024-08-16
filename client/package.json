@@ -47,7 +47,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@zwa73/react-utils": "*",
+    "@zwa73/react-utils": "^1.0.1",
     "@zwa73/utils": "*",
     "cdda-schema": "file:../../CDDA-Schema",
     "electron-squirrel-startup": "^1.0.1",

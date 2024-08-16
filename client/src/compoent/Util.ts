@@ -4,6 +4,7 @@ import { GameDataTable } from "../static/DataLoader";
 import { ChunkSlotDataMap } from "./TileMap/Chunk";
 import { ZoneChunkDataMap } from "./TileMap";
 import { TilesetData } from "../static/TilesetLoader";
+import { PRecord } from "@zwa73/utils";
 
 
 
@@ -41,6 +42,29 @@ export const getOMSSize = (oms:OverMapSpecial)=>{
     return size;
 };
 
+type PlatteTable = {
+    terrain:PRecord<string,string>;
+}
+/**omtid : platte */
+const PlatteTemp:PRecord<string,PlatteTable>={};
+export function getPlatte(id:OvermapTerrainID,gd:GameDataTable){
+    if(PlatteTemp[id]!=null) return PlatteTemp[id] as PlatteTable;
+    if(GVar.omterrainIDMap ==null) return {terrain:{}};;
+    const fulldata = GVar.omterrainIDMap;
+    const dat = fulldata[id];
+    if(dat==null) return {terrain:{}};
+    const palettes = dat.object.palettes
+        ? dat.object.palettes.map(pid=>gd.Palette[pid])
+        : [];
+    const terrainPalettes = palettes.map(p=>{
+        if(p==null) return {};
+        if(p.terrain==null) return {};
+        return p.terrain;
+    });
+    const terrainMap:typeof terrainPalettes[number] = Object.assign({},...terrainPalettes,dat.object.terrain??{});
+    return {terrain:terrainMap}
+}
+
 /**将omtid转为ChunkSlotData */
 export const getChunkSlotData = (id:OvermapTerrainID,gd:GameDataTable,td:TilesetData):ChunkSlotDataMap|undefined=>{
     if(GVar.omterrainIDMap ==null) return;
@@ -62,15 +86,7 @@ export const getChunkSlotData = (id:OvermapTerrainID,gd:GameDataTable,td:Tileset
     const yslice = charMap.slice(inMapPos.y*CHUNK_SIZE.height,(inMapPos.y+1)*CHUNK_SIZE.height);
     const overslice = yslice.map(s=>s.slice(inMapPos.x*CHUNK_SIZE.width,(inMapPos.x+1)*CHUNK_SIZE.width));
 
-    const palettes = dat.object.palettes
-        ? dat.object.palettes.map(pid=>gd.Palette[pid])
-        : [];
-    const terrainPalettes = palettes.map(p=>{
-        if(p==null) return {};
-        if(p.terrain==null) return {};
-        return p.terrain;
-    });
-    const terrainMap:typeof terrainPalettes[number] = Object.assign({},...terrainPalettes,dat.object.terrain??{});
+    const platte = getPlatte(id,gd);
 
     const fill = dat.object.fill_ter;
     const outmap:ChunkSlotDataMap = {};
@@ -78,7 +94,7 @@ export const getChunkSlotData = (id:OvermapTerrainID,gd:GameDataTable,td:Tileset
         const row = overslice[y];
         for(let x=0;x<row.length;x++){
             const char = row[x];
-            const mapc = terrainMap[char];
+            const mapc = platte.terrain[char];
             if(mapc==null){
                 if(fill==null) continue;
                 outmap[`${x}_${y}`] = {terrain:td.table[fill]};
@@ -103,7 +119,6 @@ export const getZoneChunkData = (id:OvermapTerrainID,gd:GameDataTable,td:Tileset
     const outmap:ZoneChunkDataMap={};
     omslist.forEach(o=>{
         const [x,y,z] = o.point;
-        if(z!=0) return;
         const oidWd = o.overmap;
         const match = oidWd.match(/^(.+?)_(north|south|east|west)$/);
         if(match==null) return;

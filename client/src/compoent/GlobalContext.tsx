@@ -42,8 +42,11 @@ export const GVar:{
     currentTile?:TileSlot;
     brusnId?:string;
     omterrainIDMap?:PRecord<string,Mapgen>;
+    /**主面板 */
     mainPanel?:MainPanel;
+    /**纹理文件资源缓存 */
     textureAssetTemp?:Record<string,Promise<PIXI.Texture>>;
+    /**纹理缓存 */
     spriteTextureTemp?:Record<string,PIXI.Texture>;
 } = {};
 //(window as any).gvp={}

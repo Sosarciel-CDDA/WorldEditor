@@ -22,11 +22,13 @@ type ChunkProps = {
 export class Chunk implements PixiObject{
     private node;
     private slotTable:PRecord<PosKey2D,TileSlot>={};
+    private slotDataMap:ChunkSlotDataMap={};
     private pos;
     inited:Promise<void>;
     constructor(prop:ChunkProps){
         const {pos,slotDataMap} = prop;
         this.pos=pos;
+        this.slotDataMap=slotDataMap??{};
 
         const node = new PIXI.Container();
         this.node = node;
@@ -63,6 +65,8 @@ export class Chunk implements PixiObject{
     async setSlot(data:TileSpriteData|undefined,x:number,y:number){
         const slot = this.getSlot(x,y);
         if(slot==undefined) return;
+        this.slotDataMap[`${x}_${y}`] = data;
+
         const node = await this.getNode();
         (await slot.getNode()).destroy({
             children:true,
