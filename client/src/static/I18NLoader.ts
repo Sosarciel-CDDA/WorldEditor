@@ -36,6 +36,7 @@ export type LangFlag =
     | "zh_TW";
 
 export async function loadI18NData(e:IpcMainInvokeEvent|undefined,gamePath:string,langFlag:LangFlag){
+    console.time('static loadI18NData');
     const langPatj = path.join(gamePath,'lang','mo',langFlag,'LC_MESSAGES','cataclysm-dda.mo');
     const dat = await fs.promises.readFile(langPatj);
     const table = gettextParser.mo.parse(dat);
@@ -44,6 +45,7 @@ export async function loadI18NData(e:IpcMainInvokeEvent|undefined,gamePath:strin
     Object.values(table.translations)
         .map(v=>Object.values(v)).flat()
         .forEach(v=> out[v.msgid]=v.msgstr[0] );
+    console.timeEnd('static loadI18NData');
     return out;
 }
 

@@ -11,13 +11,22 @@ const BridgeBase:Bridge = {
         return await ipcRenderer.invoke('test');
     },
     loadTileset: async (gamePath,gfxName) => {
-        return await ipcRenderer.invoke('loadTileset',gamePath,gfxName);
+        //console.time('bridge loadTileset');
+        const out = await ipcRenderer.invoke('loadTileset',gamePath,gfxName);
+        //console.timeEnd('bridge loadTileset');
+        return out;
     },
     loadGameData: async (gamePath) => {
-        return await ipcRenderer.invoke('loadGameData',gamePath);
+        //console.time('bridge loadGameData');
+        const out = await ipcRenderer.invoke('loadGameData',gamePath);
+        //console.timeEnd('bridge loadGameData');
+        return out;
     },
     loadI18NData: async (gamePath,langFlag)=>{
-        return await ipcRenderer.invoke('loadI18NData',gamePath,langFlag);
+        //console.time('bridge loadI18NData');
+        const out = await ipcRenderer.invoke('loadI18NData',gamePath,langFlag);
+        //console.timeEnd('bridge loadI18NData');
+        return out;
     }
 };
 

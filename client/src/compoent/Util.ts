@@ -3,9 +3,9 @@ import { CHUNK_SIZE, GVar } from "./GlobalContext";
 import { GameDataTable } from "../static/DataLoader";
 import { ChunkSlotDataMap } from "./TileMap/Chunk";
 import { ZoneChunkDataMap } from "./TileMap";
-import { TilesetData } from "../static/TilesetLoader";
+import { SpriteData, TilesetData } from "@/src/static/TilesetLoader";
 import { PRecord } from "@zwa73/utils";
-
+import * as PIXI from 'pixi.js';
 
 
 /**预处理omterrain */
@@ -130,4 +130,24 @@ export const getZoneChunkData = (id:OvermapTerrainID,gd:GameDataTable,td:Tileset
         //console.log(outmap[`${x}_${y}`])
     });
     return outmap;
+}
+
+
+/**纹理文件资源缓存 */
+const textureAssetTemp:Record<string,Promise<PIXI.Texture>>={};
+/**纹理缓存 */
+const spriteTextureTemp:Record<string,PIXI.Texture> = {};
+export async function loadTextureAsset(fp:string){
+    if(textureAssetTemp[fp]!=null) return textureAssetTemp[fp];
+    textureAssetTemp[fp] = PIXI.Assets.load(fp) as Promise<PIXI.Texture>;
+    return textureAssetTemp[fp];
+}
+export async function getSpriteTexture(data:SpriteData){
+    const {filepath,ofstx,ofsty,width,height,spriteId} = data;
+    if(spriteTextureTemp[spriteId]!=null) return spriteTextureTemp[spriteId];
+    const source = (await loadTextureAsset(filepath)).source;
+    const frame = new PIXI.Rectangle(ofstx, ofsty, width, height);
+    const texture = new PIXI.Texture({source, frame});
+    spriteTextureTemp[spriteId] = texture;
+    return texture;
 }

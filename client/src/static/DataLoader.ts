@@ -55,7 +55,10 @@ async function loadJsonAndCache(gamePath:string){
 
 
 export async function loadGameData(e:IpcMainInvokeEvent|undefined,gamePath:string){
+    console.time('static loadGameData');
+    //console.time('static loadJsonAndCache');
     const baseJsons = await loadJsonAndCache(gamePath);
+    //console.timeEnd('static loadJsonAndCache');
 
     const out:GameDataTable = {
         Item:{},
@@ -91,6 +94,7 @@ export async function loadGameData(e:IpcMainInvokeEvent|undefined,gamePath:strin
             })
         }
     }
+    console.timeEnd('static loadGameData');
     return out;
 }
 

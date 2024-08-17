@@ -1,6 +1,6 @@
 import { CSSProperties, forwardRef, memo, Ref, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { GlobalContext, GVar } from "./GlobalContext";
-import { ZoneChunkDataMap, ZoneMap, ZoneMapData } from "./TileMap";
+import { ZoneChunkDataMap, ZoneMap, ZoneMapPos } from "./TileMap";
 import * as PIXI from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
 
@@ -11,7 +11,7 @@ const styled:CSSProperties={
 
 export type PIXIApp = PIXI.Application<PIXI.Renderer>;
 export type MainPanel = {
-    initMap:(data:ZoneMapData,map?:ZoneChunkDataMap)=>void;
+    initMap:(data:ZoneMapPos,map?:ZoneChunkDataMap)=>void;
     changeZ:(z:number)=>Promise<void>;
 }
 export const MainPanel = memo(forwardRef((props:{},ref:Ref<MainPanel>)=>{
@@ -93,7 +93,7 @@ export const MainPanel = memo(forwardRef((props:{},ref:Ref<MainPanel>)=>{
         if(!brushing || vp==null || zoneMap==null || tilesetData==null) return;
         const {x,y} = vp.toWorld(event.clientX, event.clientY);
         //console.log(x,y);
-        const odat = zoneMap.getSlotByWorldPos(x,y)?.getData();
+        const odat = zoneMap.getSlotByWorldPos(x,y)?.getDataTable();
         const bid = GVar.brusnId=="null" ? undefined
             : GVar.brusnId ?? undefined;
         if(bid==null && odat?.terrain?.tileId==undefined){
@@ -107,7 +107,7 @@ export const MainPanel = memo(forwardRef((props:{},ref:Ref<MainPanel>)=>{
     //#endregion
 
     //#region 初始化
-    const initMap = useCallback((data:ZoneMapData,chunkDataMap?:ZoneChunkDataMap)=>{
+    const initMap = useCallback((data:ZoneMapPos,chunkDataMap?:ZoneChunkDataMap)=>{
         console.time('initMap');
         if(vp==null) return;
         vp.removeChildren()
@@ -118,7 +118,7 @@ export const MainPanel = memo(forwardRef((props:{},ref:Ref<MainPanel>)=>{
                 style: true,
             }));
 
-        const zp = new ZoneMap({ data, chunkDataMap });
+        const zp = new ZoneMap({ pos: data, chunkDataMap });
         (async ()=>{
             const node = await zp.getNode();
             vp.addChild(node);

@@ -32,6 +32,10 @@ export const Main:FC = ()=>{
                 setUserInput(text);
                 setInputVisible(false);
 
+                console.time('ipc test');
+                await BridgeHelper.test();
+                console.timeEnd('ipc test');
+
                 console.time('client init');
                 const [tilesetData,gameData,i18n] = await Promise.all([
                     BridgeHelper.loadTileset(text,'MSX++UnDeadPeopleEdition'),

@@ -1,10 +1,8 @@
-import { SLogger, throwError, UtilFT } from '@zwa73/utils';
+import { SLogger, UtilFT } from '@zwa73/utils';
 import fs from 'fs';
 import path from 'pathe';
 import Jimp from 'jimp';
 import { IpcMainInvokeEvent } from 'electron';
-import * as PIXI from 'pixi.js';
-
 
 type TilesetJson = {
     tile_info: [{
@@ -47,8 +45,22 @@ export type SpriteData = {
     /**显示时的偏移 */
     displayOfsty:number;
 };
-
+async function getPngSize(filePath:string) {
+    return new Promise<{ width:number, height:number }>((resolve, reject) => {
+        const buffer = Buffer.alloc(24);
+        fs.open(filePath, 'r', (err, fd) => {
+            if (err) return reject(err);
+            fs.read(fd, buffer, 0, 24, 0, (err) => {
+                if (err) return reject(err);
+                const width = buffer.readUInt32BE(16);
+                const height = buffer.readUInt32BE(20);
+                resolve({ width, height });
+            });
+        });
+    });
+}
 export const loadTileset = async (e:IpcMainInvokeEvent|undefined,gamePath:string,gfxName:string):Promise<TilesetData>=>{
+    console.time('static loadTileset');
     const gfxDir = path.join(gamePath,'gfx',gfxName);
     const tilesetTxt = path.join(gfxDir,'tileset.txt');
     const txt = await fs.promises.readFile(tilesetTxt,'utf-8');
@@ -60,15 +72,20 @@ export const loadTileset = async (e:IpcMainInvokeEvent|undefined,gamePath:string
         return {table:{},info:{width:0,height:0}};
     }
     const jsonPath = path.join(gfxDir,ptxt[1]);
+    //console.time('static loadTileset.loadJSONFile');
     const json = await UtilFT.loadJSONFile(jsonPath) as TilesetJson;
+    //console.timeEnd('static loadTileset.loadJSONFile');
 
     const tbase = json.tile_info[0];
     const tnews = json['tiles-new'];
     const out:Record<string,SpriteData> = {};
 
     let index = 0;
-    const imageSizes = await Promise.all(tnews.map(async tnew=>
-        (await Jimp.read(path.join(gfxDir,tnew.file))).bitmap
+    const imageSizes = await Promise.all(tnews.map(async tnew=>{
+        const pngpath = path.join(gfxDir,tnew.file);
+        //(await Jimp.read(pngpath)).bitmap
+        return await getPngSize(pngpath);
+    }
     ));
     const fileIndexList = tnews.map((tnew,i)=>{
         const filepath = path.join(gfxDir,tnew.file);
@@ -131,7 +148,7 @@ export const loadTileset = async (e:IpcMainInvokeEvent|undefined,gamePath:string
             }
         }
     }
-
+    console.timeEnd('static loadTileset');
     return {
         table:out,
         info:tbase

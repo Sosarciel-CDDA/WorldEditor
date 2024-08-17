@@ -2,7 +2,8 @@ import { CHUNK_SIZE } from "@/src/compoent/GlobalContext";
 import { PRecord } from "@zwa73/utils";
 import * as PIXI from 'pixi.js';
 import { Chunk, ChunkSlotDataMap } from "./Chunk";
-import { TileSlotPos, TileSpriteData } from "./TileSlot";
+import { TileSlotPos, TileSlotData } from "./TileSlot";
+import { PixiNode } from "./PixiInterface";
 
 export function parseSlotPos(pos:TileSlotPos){
     return {
@@ -11,7 +12,7 @@ export function parseSlotPos(pos:TileSlotPos){
     }
 }
 
-export type ZoneMapData = {
+export type ZoneMapPos = {
     tileWidth:number;
     tileHeight:number;
     minChunkX:number;
@@ -34,84 +35,61 @@ export type PosKey3D = `${number}_${number}_${number}`;
 export type PosKey2D = `${number}_${number}`;
 export type ZoneChunkDataMap = PRecord<PosKey3D,ChunkSlotDataMap>;
 export type ZoneMapProps = {
-    data:ZoneMapData;
+    pos:ZoneMapPos;
     chunkDataMap?:ZoneChunkDataMap;
 }
-export class ZoneMap implements PixiObject{
-    inited:Promise<void>;
-    private node:PIXI.Container;
-    private data:ZoneMapData;
-    private chunkTable:PRecord<PosKey3D,Chunk>={};
-    private chunkDataMap:ZoneChunkDataMap={};
+export class ZoneMap extends PixiNode<ZoneMap,Chunk,ZoneChunkDataMap>{
+    private pos:ZoneMapPos;
     currZ = null as any as number;
     //private ChunkTable:Record<ChunkKey,Chunk>;
     constructor(props:ZoneMapProps){
-        const {data,chunkDataMap} = props;
-        this.chunkDataMap = chunkDataMap??{};
-        const {maxChunkY,maxChunkX,minChunkX,minChunkY,tileWidth,tileHeight} = data;
-        const mapWidth = maxChunkX-minChunkX+1;
-        const mapHeight = maxChunkY-minChunkY+1;
-        const node = new PIXI.Container();
-        this.node = node;
-        this.data = data;
-        this.inited = this.init();
+        const {pos,chunkDataMap} = props;
+        const fixedData = chunkDataMap??{};
+        super(fixedData,new PIXI.Container());
+        this.pos = pos;
+        this.init();
     }
     getSlotByWorldPos(x:number,y:number,z:number=this.currZ){
         const pos = this.parseGlobalPos(x,y);
-        //console.log(pos);
         const chunk = this.getChunk(pos.chunkX,pos.chunkY,z);
         if(chunk==undefined) return;
         return chunk.getSlot(pos.tileX,pos.tileY);
     }
-    setSlotByWorldPos(data:TileSpriteData|undefined,x:number,y:number,z:number=this.currZ){
+    setSlotByWorldPos(data:TileSlotData|undefined,x:number,y:number,z:number=this.currZ){
         const pos = this.parseGlobalPos(x,y);
-        //console.log(pos);
         const chunk = this.getChunk(pos.chunkX,pos.chunkY,z);
         if(chunk==undefined) return;
         return chunk.setSlot(data,pos.tileX,pos.tileY);
     }
     getChunk(x:number,y:number,z:number=this.currZ){
-        return this.chunkTable[`${x}_${y}_${z}`];
-    }
-    getNode(){
-        return this.node;
+        return this.getChild(`${x}_${y}_${z}`);
     }
     async init(z:number=0){
         if(this.currZ==z) return;
         this.currZ = z;
-        this.node.removeChildren().forEach(s=>s.destroy({
-            children:true,
-            context:true,
-            style:true,
-            texture:true,
-        }));
-        this.chunkTable = {};
-        const {maxChunkY,maxChunkX,minChunkX,minChunkY,tileWidth,tileHeight} = this.data;
-        const plist:Promise<PIXI.Container>[] = [];
+        this.destoryChildren();
+        const {maxChunkY,maxChunkX,minChunkX,minChunkY,tileWidth,tileHeight} = this.pos;
         for(let chunkX = minChunkX;chunkX<=maxChunkX;chunkX++){
             for(let chunkY = minChunkY;chunkY<=maxChunkY;chunkY++){
                 const cx = chunkX;
                 const cy = chunkY;
+                const key = `${cx}_${cy}_${z}` as const;
                 const chunk = new Chunk({
                     pos:{ chunkX:cx, chunkY:cy, tileHeight, tileWidth },
-                    slotDataMap:this.chunkDataMap[`${cx}_${cy}_${z}`],
+                    slotDataMap:this.dataTable[key],
                 });
-                this.chunkTable[`${cx}_${cy}_${z}`] = chunk;
-                //console.log('chunk',`${chunkX}_${chunkY}_0`,chunkDataMap?.[`${chunkX}_${chunkY}_0`]);
-                plist.push(chunk.getNode());
+                this.setChild(key,chunk);
             }
         }
-        const chunk = (await Promise.all(plist));
-        this.node.addChild(...chunk);
     }
     parseGlobalPos(x:number,y:number){
-        const cw = CHUNK_SIZE.width*this.data.tileWidth;
-        const ch = CHUNK_SIZE.height*this.data.tileHeight;
+        const cw = CHUNK_SIZE.width*this.pos.tileWidth;
+        const ch = CHUNK_SIZE.height*this.pos.tileHeight;
         return {
             chunkX : Math.floor(x/cw),
             chunkY : Math.floor(y/ch),
-            tileX  : Math.floor(x%cw/this.data.tileWidth),
-            tileY  : Math.floor(y%ch/this.data.tileHeight),
+            tileX  : Math.floor(x%cw/this.pos.tileWidth),
+            tileY  : Math.floor(y%ch/this.pos.tileHeight),
             x,y
         }
     }

@@ -27,7 +27,7 @@ export const TipsPanel = memo(((props:{})=>{
         console.log('TipsPanel useEffect')
         const interval = setInterval(() => {
             if(I18NData==null) return;
-            const dat = GVar.currentTile?.getData();
+            const dat = GVar.currentTile?.getDataTable();
             const pos = GVar.currentTile?.getPos()!;
             if(dat==null) {
                 setText("None");
