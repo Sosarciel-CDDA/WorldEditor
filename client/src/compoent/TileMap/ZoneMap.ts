@@ -23,18 +23,12 @@ export type ZoneMapPos = {
     maxChunkZ?:number;
 }
 
-
-export type PixiObject = {
-    getNode():Promise<PIXI.Container>|PIXI.Container;
-}
-
-
 /**x_y_z */
 export type PosKey3D = `${number}_${number}_${number}`;
 /**x_y */
 export type PosKey2D = `${number}_${number}`;
 export type ZoneChunkDataMap = PRecord<PosKey3D,ChunkSlotDataMap>;
-export type ZoneMapProps = {
+type ZoneMapProps = {
     pos:ZoneMapPos;
     chunkDataMap?:ZoneChunkDataMap;
 }
@@ -43,10 +37,8 @@ export class ZoneMap extends PixiNode<ZoneMap,Chunk,ZoneChunkDataMap>{
     currZ = null as any as number;
     //private ChunkTable:Record<ChunkKey,Chunk>;
     constructor(props:ZoneMapProps){
-        const {pos,chunkDataMap} = props;
-        const fixedData = chunkDataMap??{};
-        super(fixedData,new PIXI.Container());
-        this.pos = pos;
+        super(props.chunkDataMap??{},new PIXI.Container());
+        this.pos = props.pos;
         this.init();
     }
     getSlotByWorldPos(x:number,y:number,z:number=this.currZ){
@@ -62,7 +54,7 @@ export class ZoneMap extends PixiNode<ZoneMap,Chunk,ZoneChunkDataMap>{
         return chunk.setSlot(data,pos.tileX,pos.tileY);
     }
     getChunk(x:number,y:number,z:number=this.currZ){
-        return this.getChild(`${x}_${y}_${z}`);
+        return this.getChild(`${x}_${y}_${z}` as any);
     }
     async init(z:number=0){
         if(this.currZ==z) return;

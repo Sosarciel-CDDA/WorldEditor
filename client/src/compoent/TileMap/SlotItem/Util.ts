@@ -31,13 +31,7 @@ function getWhiteGraphics(width:number,height:number){
 export async function getSprite(data:AnySpriteData,pos:TileSlotPos){
     const {tileWidth,tileHeight}=pos;
     //空图片
-    if(data==null){
-        const graphics = new PIXI.Graphics();
-        graphics.fill(0xffffff);
-        graphics.rect(0, 0, tileWidth, tileHeight);
-        graphics.fill();
-        return graphics;
-    }
+    if(data==null) return getWhiteGraphics(tileWidth,tileHeight);
     //正常图片
     if(('spriteId' in data)) {
         const node = new PIXI.Sprite(await getSpriteTexture(data));

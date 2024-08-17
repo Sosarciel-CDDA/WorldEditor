@@ -58,7 +58,7 @@ export class PixiNode<
 
     }
     /**获取子元素 */
-    getChild(key:string){
+    getChild(key:keyof D&string){
         return this.childrenTable[key];
     }
 }

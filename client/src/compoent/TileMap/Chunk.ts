@@ -48,7 +48,7 @@ export class Chunk extends PixiNode<Chunk,TileSlot,ChunkSlotDataMap>{
         }
     }
     getSlot(x:number,y:number){
-        return this.getChild(`${x}_${y}`);
+        return this.getChild(`${x}_${y}` as any);
     }
     async setSlot(data:TileSlotData|undefined,x:number,y:number){
         const slot = this.getSlot(x,y);
@@ -56,6 +56,6 @@ export class Chunk extends PixiNode<Chunk,TileSlot,ChunkSlotDataMap>{
         const newSlot = new TileSlot({
             pos:{tileX:x,tileY:y,...this.pos},data,
         });
-        this.setChild(`${x}_${y}`,newSlot);
+        this.setChild(`${x}_${y}` as any,newSlot);
     }
 }
