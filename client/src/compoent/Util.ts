@@ -1,5 +1,5 @@
 import { AnyMapgen, Mapgen, OverMapSpecial, OvermapTerrainID, TerrainID } from "cdda-schema";
-import { CHUNK_SIZE, GVar } from "./GlobalContext";
+import { CHUNK_SIZE } from "./GlobalContext";
 import { GameDataTable } from "../static/DataLoader";
 import { ChunkSlotDataMap } from "./TileMap/Chunk";
 import { ZoneChunkDataMap } from "./TileMap";
@@ -8,16 +8,16 @@ import { PRecord } from "@zwa73/utils";
 import * as PIXI from 'pixi.js';
 
 
+const omterrainIDMap:PRecord<string,Mapgen> = {};
 /**预处理omterrain */
 export const remapOMTerrainID = (mapgen:AnyMapgen[])=>{
-    const rmap = GVar.omterrainIDMap ??= {};
     mapgen.filter(t=>'om_terrain' in t)
         .forEach(t => {
             const fixt = t as Mapgen;
             const omlist = typeof fixt.om_terrain == 'string'
                 ? [fixt.om_terrain] : fixt.om_terrain.flat(Infinity);
             //if(omlist.includes('p_resort_1ne')) console.log('includes(p_resort_1ne)');
-            omlist.forEach(id => rmap[id as string]=fixt);
+            omlist.forEach(id => omterrainIDMap[id as string]=fixt);
         });
 }
 /**获取 overmap special 地图大小 */
@@ -49,9 +49,8 @@ type PlatteTable = {
 const PlatteTemp:PRecord<string,PlatteTable>={};
 export function getPlatte(id:OvermapTerrainID,gd:GameDataTable){
     if(PlatteTemp[id]!=null) return PlatteTemp[id] as PlatteTable;
-    if(GVar.omterrainIDMap ==null) return {terrain:{}};;
-    const fulldata = GVar.omterrainIDMap;
-    const dat = fulldata[id];
+    if(omterrainIDMap ==null) return {terrain:{}};;
+    const dat = omterrainIDMap[id];
     if(dat==null) return {terrain:{}};
     const palettes = dat.object.palettes
         ? dat.object.palettes.map(pid=>gd.Palette[pid])
@@ -67,9 +66,8 @@ export function getPlatte(id:OvermapTerrainID,gd:GameDataTable){
 
 /**将omtid转为ChunkSlotData */
 export const getChunkSlotData = (id:OvermapTerrainID,gd:GameDataTable,td:TilesetData):ChunkSlotDataMap|undefined=>{
-    if(GVar.omterrainIDMap ==null) return;
-    const fulldata = GVar.omterrainIDMap;
-    const dat = fulldata[id];
+    if(omterrainIDMap ==null) return;
+    const dat = omterrainIDMap[id];
     if(dat==null) return;
     const inMapPos = {x:0,y:0};
     if(typeof dat.om_terrain != 'string'){

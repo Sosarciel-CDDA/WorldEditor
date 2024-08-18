@@ -1,12 +1,12 @@
-import { css, keyframes } from "styled-components"
+import { css } from "styled-components"
 import { TipsPanel } from "./TipsPanel"
-import { FC, Ref, RefObject, useCallback, useContext, useRef } from "react"
+import { FC, useCallback, useContext, useRef } from "react"
 import { InputCard } from "../InputCard"
-import { GlobalContext, GVar } from "../GlobalContext"
+import { GlobalContext, InitData } from "../GlobalContext"
 import { Card } from "@zwa73/react-utils"
-import { ZoneMap } from "../TileMap"
-import { OverMapSpecial } from "cdda-schema"
 import { getOMSSize, getZoneChunkData } from "../Util"
+import { BrushSharedData } from "../Brush"
+import { CanvasPanelRef } from "../CanvasPanel"
 
 
 
@@ -59,52 +59,55 @@ type ToolPanelProps = {}
 
 export const ToolPanel:FC<ToolPanelProps> = (props:ToolPanelProps)=>{
     const {} = props;
-    const {tilesetData,gameDataTable} = useContext(GlobalContext);
+    const {inited} = useContext(GlobalContext);
 
     //#region 地形笔刷输入
     const terrainInputRef = useRef<InputCard>(null);
     const handleTerrainSubmit = useCallback(()=>{
-        GVar.brusnId = terrainInputRef.current?.getText();
+        BrushSharedData.brushSlot = terrainInputRef.current?.getText();
         //console.log(GlobalVarHelper.brusnId);
-    },[terrainInputRef]);
+    },[]);
     //#endregion
 
     //#region 地图ID输入
     const omsInputRef = useRef<InputCard>(null);
     const handleOMTSubmit = useCallback(()=>{
-        if(GVar.mainPanel && tilesetData && gameDataTable && omsInputRef.current){
-            const omsid = omsInputRef.current.getText();
-            const oms = gameDataTable.OvermapSpecial[omsid];
-            const size = (oms==null) ? {
-                minChunkX:0,
-                maxChunkX:2,
-                minChunkY:0,
-                maxChunkY:2,
-                minChunkZ:0,
-                maxChunkZ:0,
-            } : getOMSSize(oms);
+        const canvas = CanvasPanelRef.current;
+        if(canvas==null) return;
+        if(inited!==true) return;
+        if(omsInputRef.current==null) return;
+        const {} = canvas.getData();
+        const omsid = omsInputRef.current.getText();
+        const oms = InitData.gameDataTable.OvermapSpecial[omsid];
+        const size = (oms==null) ? {
+            minChunkX:0,
+            maxChunkX:2,
+            minChunkY:0,
+            maxChunkY:2,
+            minChunkZ:0,
+            maxChunkZ:0,
+        } : getOMSSize(oms);
 
-            //console.log(size);
-            const mainPanel = GVar.mainPanel;
-            mainPanel.initMap({
-                ...size,
-                tileHeight:tilesetData.info.height,
-                tileWidth:tilesetData.info.width,
-            },getZoneChunkData(omsid,gameDataTable,tilesetData));
-        }
-    },[tilesetData]);
+        //console.log(size);
+        canvas.initMap({
+            ...size,
+            tileHeight:InitData.tilesetData.info.height,
+            tileWidth:InitData.tilesetData.info.width,
+        },getZoneChunkData(omsid,InitData.gameDataTable,InitData.tilesetData));
+    },[inited]);
     //#endregion
 
     //#region Z轴输入
     const zAxisInputRef = useRef<InputCard>(null);
     const handleZAxisInputSubmit = useCallback(()=>{
+        const canvas = CanvasPanelRef.current;
+        if(canvas==null) return;
         if(zAxisInputRef.current==null) return;
         const num = Number(zAxisInputRef.current?.getText());
         if(isNaN(num) || num ==null) return;
-        const mainPanel = GVar.mainPanel;
-        if(mainPanel==null) return;
-        mainPanel.changeZ(num);
-    },[zAxisInputRef]);
+        if(canvas==null) return;
+        canvas.changeZ(num);
+    },[]);
     //#endregion
 
 

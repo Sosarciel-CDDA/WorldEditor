@@ -42,9 +42,13 @@ export async function loadI18NData(e:IpcMainInvokeEvent|undefined,gamePath:strin
     const table = gettextParser.mo.parse(dat);
     const out:PRecord<string,string>={};
 
-    Object.values(table.translations)
-        .map(v=>Object.values(v)).flat()
-        .forEach(v=> out[v.msgid]=v.msgstr[0] );
+    for (const k in table.translations) {
+        const innerValues = table.translations[k];
+        for (const ik in innerValues) {
+            const v = innerValues[ik];
+            out[v.msgid] = v.msgstr[0];
+        }
+    }
     console.timeEnd('static loadI18NData');
     return out;
 }

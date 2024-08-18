@@ -1,7 +1,8 @@
 import { memo, useContext, useEffect, useState } from "react";
-import { GlobalContext, GVar } from "@/src/compoent/GlobalContext";
+import { GlobalContext, InitData } from "@/src/compoent/GlobalContext";
 import { Card } from '@zwa73/react-utils';
 import { css } from "styled-components";
+import { CanvasPanelRef } from "../CanvasPanel";
 
 
 
@@ -21,24 +22,27 @@ const tileTooltipStyled = css`
 export const TipsPanel = memo(((props:{})=>{
     const [text,setText] = useState('');
 
-    const {I18NData,gameDataTable} = useContext(GlobalContext);
+    const {inited} = useContext(GlobalContext);
 
     useEffect(() => {
         console.log('TipsPanel useEffect')
+        if(inited!=true) return;
         const interval = setInterval(() => {
-            if(I18NData==null) return;
-            const dat = GVar.currentTile?.getDataTable();
-            const pos = GVar.currentTile?.getPos()!;
-            if(dat==null) {
+            const canvas = CanvasPanelRef.current;
+            if(canvas==null) return;
+            const {currentTile} = canvas.getData();
+            const dat = currentTile?.getDataTable();
+            const pos = currentTile?.getPos();
+            if(dat==null || pos==null) {
                 setText("None");
-                return
+                return;
             }
             const gameId = dat.terrain?.tileId;
             if(gameId==null) {
                 setText("None");
                 return
             }
-            const gameDat = gameDataTable?.Terrain[gameId];
+            const gameDat = InitData.gameDataTable.Terrain[gameId];
             if(gameDat==undefined) return;
             const name = typeof gameDat.name == 'string'
                 ? gameDat.name
@@ -46,14 +50,14 @@ export const TipsPanel = memo(((props:{})=>{
             const display =
                 `id: ${gameDat.id}\n`+
                 `name: ${name}\n`+
-                `trans_name: ${I18NData[name]}\n`+
+                `trans_name: ${InitData.i18NData[name]}\n`+
                 `chunk: (${pos.chunkX},${pos.chunkY})\n`+
                 `pos: (${pos.tileX},${pos.tileY})\n`;
             setText(display);
         }, 100); // 每100毫秒检查一次全局变量的变化
 
         return () => clearInterval(interval);
-    }, [I18NData,gameDataTable]);
+    }, [inited]);
     console.log('rendering TipsPanel')
 
     return (<Card

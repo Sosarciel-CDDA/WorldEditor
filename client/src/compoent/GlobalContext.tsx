@@ -4,46 +4,52 @@ import { TileSlot, ZoneMap } from './TileMap';
 import { GameDataTable } from '@/src/static/DataLoader';
 import { PRecord } from '@zwa73/utils';
 import { AnyMapgen, Mapgen } from 'cdda-schema';
-import { MainPanel } from './MainPanel';
+import { CanvasPanelRef } from './CanvasPanel';
 import * as PIXI from 'pixi.js';
 
 
 
 
 
+
+type SetContext<T> = React.Dispatch<React.SetStateAction<T | undefined>>;;
+type Context<T> = T | undefined;
 // 创建上下文
 export const GlobalContext = createContext<{
-    tilesetData: TilesetData|undefined;
-    setTilesetData: React.Dispatch<React.SetStateAction<TilesetData | undefined>>;
-    gameDataTable: GameDataTable|undefined;
-    setGameDataTable: React.Dispatch<React.SetStateAction<GameDataTable | undefined>>;
-    I18NData: PRecord<string,string>|undefined;
-    setI18NData: React.Dispatch<React.SetStateAction<PRecord<string,string> | undefined>>;
+    inited:Context<boolean>;
+    setInited:SetContext<boolean>;
 }>({} as any);
 
 // 创建提供者组件
 export const GlobalProvider = (({ children }: { children: ReactNode }) => {
-    const [tilesetData, setTilesetData]           = useState<TilesetData|undefined>(undefined);
-    const [gameDataTable, setGameDataTable]       = useState<GameDataTable|undefined>(undefined);
-    const [I18NData, setI18NData]                 = useState<PRecord<string,string>|undefined>(undefined);
+    const [inited, setInited]           = useState<Context<boolean>>(undefined);
 
     return (
         <GlobalContext.Provider value={{
-            tilesetData, setTilesetData,
-            gameDataTable, setGameDataTable,
-            I18NData, setI18NData,
+            inited, setInited,
         }}>
             {children}
         </GlobalContext.Provider>
     );
 });
 
-export const GVar:{
-    currentTile?:TileSlot;
-    brusnId?:string;
-    omterrainIDMap?:PRecord<string,Mapgen>;
-    /**主面板 */
-    mainPanel?:MainPanel;
-} = {};
+/**初始化数据 */
+export const InitData: {
+    tilesetData:TilesetData;
+    gameDataTable:GameDataTable;
+    i18NData:PRecord<string,string>;
+} = {
+    tilesetData:{info:{height:0,width:0},table:{}},
+    gameDataTable:{
+        Item:{},
+        Mapgen:[],
+        Monster:{},
+        OvermapSpecial:{},
+        Palette:{},
+        Terrain:{},
+    },
+    i18NData:{},
+};
+
 //(window as any).gvp={}
 export const CHUNK_SIZE = {width:24,height:24}

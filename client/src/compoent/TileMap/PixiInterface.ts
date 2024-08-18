@@ -1,11 +1,11 @@
-import { JObject, PRecord } from '@zwa73/utils';
+import { PRecord } from '@zwa73/utils';
 import * as PIXI from 'pixi.js';
 
 
 
 /**PIXI终端元素 */
 export class PixiUnit<T extends PixiUnit<T,D>, D>{
-    constructor(protected dataTable:D,protected node:PIXI.Container){}
+    constructor(protected dataTable:D,protected node:PIXI.Container = new PIXI.Container){}
     /**销毁自身 */
     destory(){
         this.node.destroy({
@@ -31,7 +31,7 @@ export class PixiNode<
     D extends PRecord<string,ReturnType<C['getDataTable']>>
 > extends PixiUnit<PixiNode<T,C,D>,D>{
     protected childrenTable:PRecord<string,C>={};
-    constructor(dataTable:D,node:PIXI.Container){
+    constructor(dataTable:D,node?:PIXI.Container){
         super(dataTable,node);
         this.dataTable=dataTable;
     }

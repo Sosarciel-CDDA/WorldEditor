@@ -1,9 +1,9 @@
-import { FC, useContext, useRef, useState } from "react";
+import { FC, useCallback, useContext, useRef, useState } from "react";
 import { InputCard } from "./InputCard";
 import { BridgeHelper } from "BridgeHelper";
-import { GlobalContext } from "./GlobalContext";
+import { GlobalContext, InitData } from "./GlobalContext";
 import { ToolPanel } from "./ToolPanel";
-import { MainPanel } from "./MainPanel";
+import { CanvasPanelRef, CanvasPanelDom } from "./CanvasPanel";
 import { css } from "styled-components";
 import { remapOMTerrainID } from "./Util";
 
@@ -18,43 +18,31 @@ const inputCardStyle = css`
 `;
 
 export const Main:FC = ()=>{
-    const { setTilesetData,setGameDataTable,setI18NData } = useContext(GlobalContext);
-    const [inited,setInited] = useState(false);
     const inputDialogRef = useRef<InputCard>(null);
     const [inputVisible, setInputVisible] = useState(true);
-    const [userInput, setUserInput] = useState('');
+    const {setInited} = useContext(GlobalContext);
 
-    const handleInputSubmit = () => {
+    const handleInputSubmit = useCallback(() => {
         (async ()=>{
-            if (inputDialogRef.current) {
-                //const text = inputDialogRef.current.getText();
-                const text = "H:/CDDA/cdda-windows-tiles-x64-2023-05-08-0608/";
-                setUserInput(text);
-                setInputVisible(false);
+            if (!inputDialogRef.current) return;
+            //const text = inputDialogRef.current.getText();
+            const text = "H:/CDDA/cdda-windows-tiles-x64-2023-05-08-0608/";
+            setInputVisible(false);
 
-                console.time('ipc test');
-                await BridgeHelper.test();
-                console.timeEnd('ipc test');
-
-                console.time('client init');
-                const [tilesetData,gameData,i18n] = await Promise.all([
-                    BridgeHelper.loadTileset(text,'MSX++UnDeadPeopleEdition'),
-                    BridgeHelper.loadGameData(text),
-                    BridgeHelper.loadI18NData(text,'zh_CN'),
-                ]);
-                setTilesetData(tilesetData);
-                setGameDataTable(gameData);
-                setI18NData(i18n);
-                remapOMTerrainID(gameData.Mapgen);
-                console.timeEnd('client init');
-                setInited(true);
-            }
+            console.time('client init');
+            const [tilesetData,gameData,i18n] = await Promise.all([
+                BridgeHelper.loadTileset(text,'MSX++UnDeadPeopleEdition'),
+                BridgeHelper.loadGameData(text),
+                BridgeHelper.loadI18NData(text,'zh_CN'),
+            ]);
+            InitData.tilesetData = tilesetData;
+            InitData.gameDataTable = gameData;
+            InitData.i18NData = i18n;
+            remapOMTerrainID(gameData.Mapgen);
+            console.timeEnd('client init');
+            setInited(true);
         })();
-    };
-
-    //#region 重设事件
-    const panelRef = useRef<MainPanel>(null);
-    //#endregion
+    },[]);
     console.log('rendering Main')
 
     return (
@@ -68,7 +56,7 @@ export const Main:FC = ()=>{
                 initialText=''
                 ref={inputDialogRef}
             />}
-            <MainPanel ref={panelRef}/>
+            {CanvasPanelDom}
             <ToolPanel/>
         </body>
     );

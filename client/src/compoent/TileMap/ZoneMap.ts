@@ -1,6 +1,5 @@
 import { CHUNK_SIZE } from "@/src/compoent/GlobalContext";
 import { PRecord } from "@zwa73/utils";
-import * as PIXI from 'pixi.js';
 import { Chunk, ChunkSlotDataMap } from "./Chunk";
 import { TileSlotPos, TileSlotData } from "./TileSlot";
 import { PixiNode } from "./PixiInterface";
@@ -37,7 +36,7 @@ export class ZoneMap extends PixiNode<ZoneMap,Chunk,ZoneChunkDataMap>{
     currZ = null as any as number;
     //private ChunkTable:Record<ChunkKey,Chunk>;
     constructor(props:ZoneMapProps){
-        super(props.chunkDataMap??{},new PIXI.Container());
+        super(props.chunkDataMap??{});
         this.pos = props.pos;
         this.init();
     }

@@ -1,8 +1,9 @@
-import { CSSProperties, forwardRef, memo, Ref, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import { GlobalContext, GVar } from "./GlobalContext";
-import { ZoneChunkDataMap, ZoneMap, ZoneMapPos } from "./TileMap";
+import React, { CSSProperties, forwardRef, memo, Ref, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { GlobalContext } from "./GlobalContext";
+import { TileSlot, ZoneChunkDataMap, ZoneMap, ZoneMapPos } from "./TileMap";
 import * as PIXI from 'pixi.js';
 import { Viewport } from 'pixi-viewport';
+import { BrushRoute } from "./Brush";
 
 const styled:CSSProperties={
     width:'100%',
@@ -10,19 +11,32 @@ const styled:CSSProperties={
 };
 
 export type PIXIApp = PIXI.Application<PIXI.Renderer>;
-export type MainPanel = {
+
+export type CanvasPanelData = {
+    currentTile?:TileSlot;
+    inLeftDown? :boolean;
+    hover?      :boolean;
+    vp?         :Viewport;
+    zoneMap?    :ZoneMap;
+};
+
+export type CanvasPanel = {
     initMap:(data:ZoneMapPos,map?:ZoneChunkDataMap)=>void;
     changeZ:(z:number)=>Promise<void>;
-}
-export const MainPanel = memo(forwardRef((props:{},ref:Ref<MainPanel>)=>{
-    const {tilesetData} = useContext(GlobalContext);
-    const [zoneMap, setZoneMap] = useState<ZoneMap|null>(null);
-    //#region 初始化视窗
-    const [vp,setVP] = useState<Viewport|undefined>(undefined);
+    getData:()=>CanvasPanelData;
+};
+
+
+const _CanvasPanel = forwardRef((props:{},ref:Ref<CanvasPanel>)=>{
+    const {inited} = useContext(GlobalContext);
     const canvasRef = useRef<HTMLDivElement>(null);
+    const refData = useRef<CanvasPanelData>({});
+
+    //#region 初始化视窗
     useEffect(() => {
-        console.log('MainPanel useEffect');
-        if(canvasRef.current) (async ()=>{
+        console.log('CanvasPanel useEffect');
+        if(!canvasRef.current) return;
+        (async ()=>{
             const app = new PIXI.Application();
             await app.init({
                 width: window.innerWidth,
@@ -52,7 +66,7 @@ export const MainPanel = memo(forwardRef((props:{},ref:Ref<MainPanel>)=>{
                 .pinch().wheel().decelerate()
                 .clampZoom({ minScale: 0.1, maxScale: 4 }); // 设置缩放的最小值和最大值
 
-            setVP(viewport);
+            refData.current.vp = viewport;
 
             // 监听窗口resize事件
             const handleResize = () => {
@@ -62,7 +76,24 @@ export const MainPanel = memo(forwardRef((props:{},ref:Ref<MainPanel>)=>{
 
             window.addEventListener("resize", handleResize);
 
+            //监听鼠标移动
+            const handleMouseMove = (event:PIXI.FederatedPointerEvent) => {
+                const {hover,zoneMap} = refData.current;
+                if(!hover || !zoneMap) return;
+                const {x,y} = viewport.toWorld(event.clientX, event.clientY);
+                const ct = zoneMap.getSlotByWorldPos(x,y);
+                refData.current.currentTile = ct;
+                BrushRoute({
+                    event,
+                    map: zoneMap,
+                    vp:viewport,
+                    canvas:localRef
+                });
+            };
+            viewport.on('mousemove', handleMouseMove);
+
             return () => {
+                viewport.off('mousemove', handleMouseMove);
                 window.removeEventListener("resize", handleResize);
                 app.destroy(true, { children: true });
             };
@@ -71,45 +102,29 @@ export const MainPanel = memo(forwardRef((props:{},ref:Ref<MainPanel>)=>{
     //#endregion
 
     //#region 拖曳
-    const [brushing, setBrushing] = useState(false);
-    const [hover,setHover] = useState(false);
     const handleMouseDown = useCallback((e: React.MouseEvent)=>{
         if(e.button === 0){
             e.preventDefault();
-            setBrushing(true);
+            refData.current.inLeftDown=true;
         }
     },[]);
     const handleMouseLeave = useCallback((e: React.MouseEvent)=>{
-        setBrushing(false);
-        setHover(false);
+        refData.current.inLeftDown=false;
+        refData.current.hover=false;
     },[]);
     const handleMouseHover = useCallback((e: React.MouseEvent)=>{
-        setHover(true);
+        refData.current.hover=true;
     },[]);
     const handleMouseMove = useCallback((e: React.MouseEvent)=>{
-        setHover(true);
+        refData.current.hover=true;
     },[]);
-    const inBrushing = useCallback((event:PIXI.FederatedPointerEvent)=>{
-        if(!brushing || vp==null || zoneMap==null || tilesetData==null) return;
-        const {x,y} = vp.toWorld(event.clientX, event.clientY);
-        //console.log(x,y);
-        const odat = zoneMap.getSlotByWorldPos(x,y)?.getDataTable();
-        const bid = GVar.brusnId=="null" ? undefined
-            : GVar.brusnId ?? undefined;
-        if(bid==null && odat?.terrain?.tileId==undefined){
-            zoneMap.setSlotByWorldPos(undefined,x,y);
-            return;
-        }
-        const ndat = bid == undefined ? undefined : tilesetData.table[bid];
-        if(odat?.terrain?.tileId != ndat?.tileId)
-            zoneMap.setSlotByWorldPos({terrain:ndat},x,y);
-    },[brushing,vp,zoneMap,tilesetData]);
     //#endregion
 
     //#region 初始化
     const initMap = useCallback((data:ZoneMapPos,chunkDataMap?:ZoneChunkDataMap)=>{
         console.time('initMap');
-        if(vp==null) return;
+        const vp = refData.current.vp;
+        if(vp==null || inited!=true) return;
         vp.removeChildren()
             .forEach(co=>co.destroy({
                 children:true,
@@ -122,31 +137,28 @@ export const MainPanel = memo(forwardRef((props:{},ref:Ref<MainPanel>)=>{
         (async ()=>{
             const node = await zp.getNode();
             vp.addChild(node);
-            setZoneMap(zp);
+            refData.current.zoneMap=zp;
             console.timeEnd('initMap');
         })();
-    },[vp,tilesetData]);
+    },[inited]);
     const changeZ = useCallback(async (z:number)=>{
-        await zoneMap?.init(z);
-    },[zoneMap]);
-    //#endregion
-    useEffect(()=>{
-        if (!vp) return;
-        const handleMouseMove = (event:PIXI.FederatedPointerEvent) => {
-            inBrushing(event);
-            if(hover){
-                const {x,y} = vp.toWorld(event.clientX, event.clientY);
-                const ct = zoneMap?.getSlotByWorldPos(x,y);
-                GVar.currentTile = ct;
-            }
+        await refData.current.zoneMap?.init(z);
+    },[]);
+    const getData = useCallback(()=>refData.current,[]);
+    const styled:CSSProperties = useMemo(()=>{
+        return {
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            zIndex: 1,
         };
-        vp.on('mousemove', handleMouseMove);
-        return () => void vp.off('mousemove', handleMouseMove);
-    },[vp,inBrushing,zoneMap,hover]);
-    const localRef = {initMap,changeZ};
+    },[]);
+    const localRef = {initMap,changeZ,getData};
+    //#endregion
     useImperativeHandle(ref,()=>localRef);
-    GVar.mainPanel=localRef;
-    console.log('rendering MainPanel')
+    console.log('rendering CanvasPanel')
 
     return(
         <div style={styled}
@@ -158,4 +170,14 @@ export const MainPanel = memo(forwardRef((props:{},ref:Ref<MainPanel>)=>{
             onMouseMove={handleMouseMove}
         />
     )
-}));
+});
+
+export const {CanvasPanelRef,CanvasPanelDom} = (()=>{
+    const ref = React.createRef<CanvasPanel>();
+    const dom = <_CanvasPanel ref={ref}/>;
+    return{
+        CanvasPanelDom:dom,
+        CanvasPanelRef:ref
+    }
+})();
+

@@ -1,4 +1,3 @@
-import * as PIXI from 'pixi.js';
 import { AnySpriteData, SlotTerrain } from './SlotItem';
 import { PixiNode } from './PixiInterface';
 
@@ -23,7 +22,7 @@ export class TileSlot extends PixiNode<TileSlot,SlotTerrain,TileSlotData>{
     constructor(props: TileSlotProps) {
         const {data,pos} = props;
         const fixedData = data??{};
-        super(fixedData,new PIXI.Container());
+        super(fixedData);
         this.pos=pos;
         this.init(pos);
     }

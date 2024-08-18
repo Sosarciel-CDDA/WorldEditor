@@ -1,6 +1,4 @@
 import { PRecord } from '@zwa73/utils';
-import * as PIXI from 'pixi.js';
-import { PosKey2D } from './ZoneMap';
 import { CHUNK_SIZE } from '../GlobalContext';
 import { TileSlotData,TileSlot } from './TileSlot';
 import { PixiNode } from './PixiInterface';
@@ -25,7 +23,7 @@ export class Chunk extends PixiNode<Chunk,TileSlot,ChunkSlotDataMap>{
     constructor(prop:ChunkProps){
         const {pos,slotDataMap} = prop;
         const fixedData = slotDataMap??{};
-        super(fixedData,new PIXI.Container());
+        super(fixedData);
         this.pos=pos;
         this.init(pos);
     }
