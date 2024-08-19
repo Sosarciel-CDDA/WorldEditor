@@ -12,11 +12,12 @@ type TilesetJson = {
     "tiles-new": {
         file: string;
         tiles: {
-            id: string;
-            fg: number|{
+            id: string|string[];
+            fg: number|number[]|{
                 weight:number,
                 sprite:number
             }[];
+            bg:number|number[];
             rotates?: boolean;
             animated?: boolean,
         }[];
@@ -44,6 +45,8 @@ export type SpriteData = {
     displayOfstx:number;
     /**显示时的偏移 */
     displayOfsty:number;
+    /**底图 */
+    bg?:Omit<SpriteData,'bg'|'tileId'>;
 };
 async function getPngSize(filePath:string) {
     return new Promise<{ width:number, height:number }>((resolve, reject) => {
@@ -64,9 +67,7 @@ export const loadTileset = async (e:IpcMainInvokeEvent|undefined,gamePath:string
     const gfxDir = path.join(gamePath,'gfx',gfxName);
     const tilesetTxt = path.join(gfxDir,'tileset.txt');
     const txt = await fs.promises.readFile(tilesetTxt,'utf-8');
-    const ptxt = txt.match(
-        /JSON: (.+)/
-    );
+    const ptxt = txt.match( /JSON: (.+)/ );
     if(ptxt==null){
         SLogger.warn(`tileset.txt格式错误 ${txt}`);
         return {table:{},info:{width:0,height:0}};
@@ -99,6 +100,8 @@ export const loadTileset = async (e:IpcMainInvokeEvent|undefined,gamePath:string
             start:index,
             ofstx: tnew.sprite_offset_x??0,
             ofsty: tnew.sprite_offset_y??0,
+            width:tnew.sprite_width??tbase.width,
+            height:tnew.sprite_height??tbase.height,
         };
         index += (imageWidth!/tileWidth * imageHeight!/tileHeight);
         return out;
@@ -121,6 +124,8 @@ export const loadTileset = async (e:IpcMainInvokeEvent|undefined,gamePath:string
                     displayOfsty:fd.ofsty,
                     ofstx: row   * fd.tileWidth ,
                     ofsty: column* fd.tileHeight,
+                    width:fd.width,
+                    height:fd.height,
                 }
             }
         }
@@ -132,20 +137,27 @@ export const loadTileset = async (e:IpcMainInvokeEvent|undefined,gamePath:string
         for(const tile of tiles){
             if(tile.fg ==undefined) continue;
             const spriteId = typeof tile.fg == 'number'
-                ? tile.fg : tile.fg[0].sprite;
+                ? tile.fg
+                : typeof tile.fg[0] == 'number'
+                ? tile.fg[0] : tile.fg[0].sprite;
             if(spriteId==undefined) continue;
             const foundD = foundSpriteWithMap(spriteId);
             if(foundD==undefined){
                 console.log(`can'not found spriteId data ${spriteId} skip`);
                 continue;
             }
+            const bgid = tile.bg == null ? undefined
+                : typeof tile.bg == 'number'
+                    ? tile.bg : tile.bg[0];
+            const foundBg = bgid==undefined ? undefined : foundSpriteWithMap(bgid);
 
-            out[tile.id]={
+            const fixedid = typeof tile.id == 'string'
+                ? [tile.id] : tile.id;
+            fixedid.forEach(id=>out[id]={
                 ...foundD,
-                tileId:tile.id,
-                width:tnew.sprite_width??tbase.width,
-                height:tnew.sprite_height??tbase.height,
-            }
+                tileId:id,
+                bg:foundBg,
+            });
         }
     }
     console.timeEnd('static loadTileset');

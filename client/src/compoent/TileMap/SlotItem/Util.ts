@@ -34,12 +34,22 @@ export async function getSprite(data:AnySpriteData,pos:TileSlotPos){
     if(data==null) return getWhiteGraphics(tileWidth,tileHeight);
     //正常图片
     if(('spriteId' in data)) {
-        const node = new PIXI.Sprite(await getSpriteTexture(data));
-        const {displayOfstx,displayOfsty} = (data!=null && 'spriteId' in data)
+        const con = new PIXI.Container();
+        if(data.bg!=undefined){
+            const bg = new PIXI.Sprite(await getSpriteTexture(data.bg));
+            const {displayOfstx,displayOfsty} = 'spriteId' in data.bg
+                ? data.bg : {displayOfstx:0,displayOfsty:0};
+            bg.x = displayOfstx;
+            bg.y = displayOfsty;
+            con.addChild(bg);
+        }
+        const fg = new PIXI.Sprite(await getSpriteTexture(data));
+        const {displayOfstx,displayOfsty} = 'spriteId' in data
             ? data : {displayOfstx:0,displayOfsty:0};
-        node.x = displayOfstx;
-        node.y = displayOfsty;
-        return node;
+        fg.x = displayOfstx;
+        fg.y = displayOfsty;
+        con.addChild(fg);
+        return con;
     }
     //文本
     const {tileId} = data;
@@ -62,9 +72,9 @@ export async function getSprite(data:AnySpriteData,pos:TileSlotPos){
             wordWrapWidth:tileWidth,
         }),
     });
-    container.addChild(graphics)
-        .addChild(text)
-        .addChild(mask);
+    container.addChild(graphics);
+    container.addChild(text);
+    container.addChild(mask);
     container.mask = mask;
     return container;
 }

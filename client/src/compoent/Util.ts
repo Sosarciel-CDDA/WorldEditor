@@ -129,19 +129,16 @@ export const getChunkSlotData = (id:OvermapTerrainID,gd:GameDataTable,td:Tileset
         for(let x=0;x<row.length;x++){
             const char = row[x];
 
-            const slot:TileSlotData={
-                terrain:undefined,
-                furniture:undefined,
-            }
+            const slot:TileSlotData={};
 
             //地形
             const tid = getPaletteToF('terrain',char,palette);
-            if(tid==null && fillT!=null) slot.terrain = td.table[fillT]??null;
-            else if(tid!=null) slot.terrain = td.table[tid]??null;
+            if(tid==null && fillT!=null) slot.terrain = td.table[fillT]??{tileId:fillT};
+            else if(tid!=null) slot.terrain = td.table[tid]??{tileId:tid};
 
             //家具
             const fid = getPaletteToF('furniture',char,palette);
-            if(fid!=null) slot.furniture = td.table[fid]??null;
+            if(fid!=null) slot.furniture = td.table[fid]??{tileId:fid};
 
             outmap[`${x}_${y}`] = slot;
         }
@@ -150,14 +147,12 @@ export const getChunkSlotData = (id:OvermapTerrainID,gd:GameDataTable,td:Tileset
     //填入place
     mapgen.object.place_furniture?.forEach(pf=>{
         const {x,y,chance,furn} = pf;
-        if(typeof x != 'number') return
-        if(typeof y != 'number') return
-        if(chance!=null) return
+        if(typeof x != 'number') return;
+        if(typeof y != 'number') return;
+        if(chance!=null) return;
         const slot = outmap[`${x}_${y}`]??={};
-        slot.furniture=td.table[furn]??null;
+        slot.furniture=td.table[furn]??{tileId:furn};
     });
-
-
 
     return outmap;
 }
@@ -193,7 +188,7 @@ export async function loadTextureAsset(fp:string){
     textureAssetTemp[fp] = PIXI.Assets.load(fp) as Promise<PIXI.Texture>;
     return textureAssetTemp[fp];
 }
-export async function getSpriteTexture(data:SpriteData){
+export async function getSpriteTexture(data:Omit<SpriteData, "bg" | "tileId">){
     const {filepath,ofstx,ofsty,width,height,spriteId} = data;
     if(spriteTextureTemp[spriteId]!=null) return spriteTextureTemp[spriteId];
     const source = (await loadTextureAsset(filepath)).source;

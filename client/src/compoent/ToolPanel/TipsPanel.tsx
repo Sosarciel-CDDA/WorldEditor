@@ -51,7 +51,10 @@ export const TipsPanel = memo(((props:{})=>{
                 const gameId = dat.terrain?.tileId;
                 if(gameId==null) return;
                 const gameDat = InitData.gameDataTable.Terrain[gameId];
-                if(gameDat==undefined) return;
+                if(gameDat==undefined) {
+                    displayText += `terrain_id: ${gameId}\n`
+                    return;
+                }
                 const name = getTextByDesc(gameDat.name);
                 displayText +=
                     `terrain_id: ${gameDat.id}\n`+
@@ -63,14 +66,17 @@ export const TipsPanel = memo(((props:{})=>{
                 const gameId = dat.furniture?.tileId;
                 if(gameId==null) return;
                 const gameDat = InitData.gameDataTable.Furniture[gameId];
-                if(gameDat==undefined) return;
+                if(gameDat==undefined) {
+                    displayText += `furniture_id: ${gameId}\n`
+                    return;
+                }
                 const name = getTextByDesc(gameDat.name);
                 displayText +=
                     `furniture_id: ${gameDat.id}\n`+
                     `furniture_name: ${name}\n`+
                     `furniture_trans_name: ${InitData.i18NData[name]}\n`
             })();
-            setText(displayText);
+            setText(displayText.trim());
         }, 100); // 每100毫秒检查一次全局变量的变化
 
         return () => clearInterval(interval);
