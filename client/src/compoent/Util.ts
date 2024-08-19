@@ -1,8 +1,8 @@
-import { AnyMapgen, Mapgen, OverMapSpecial, OvermapTerrainID, TerrainID } from "cdda-schema";
+import { AnyMapgen, Mapgen, OverMapSpecial, OvermapTerrainID, Palette, TerrainID } from "cdda-schema";
 import { CHUNK_SIZE } from "./GlobalContext";
 import { GameDataTable } from "../static/DataLoader";
 import { ChunkSlotDataMap } from "./TileMap/Chunk";
-import { ZoneChunkDataMap } from "./TileMap";
+import { TileSlotData, ZoneChunkDataMap } from "./TileMap";
 import { SpriteData, TilesetData } from "@/src/static/TilesetLoader";
 import { PRecord } from "@zwa73/utils";
 import * as PIXI from 'pixi.js';
@@ -42,70 +42,123 @@ export const getOMSSize = (oms:OverMapSpecial)=>{
     return size;
 };
 
-type PlatteTable = {
-    terrain:PRecord<string,string>;
-}
+
 /**omtid : platte */
-const PlatteTemp:PRecord<string,PlatteTable>={};
-export function getPlatte(id:OvermapTerrainID,gd:GameDataTable){
-    if(PlatteTemp[id]!=null) return PlatteTemp[id] as PlatteTable;
-    if(omterrainIDMap ==null) return {terrain:{}};;
+const PlatteTemp:PRecord<string,MergedPalette>={};
+function mergePaletteKey<K extends (keyof Palette&keyof Mapgen['object'])>
+    (key:K,mapgen:Mapgen,palettes:Palette[]){
+    const inline = mapgen.object[key] ?? {}as NonNullable<Palette[K]>;
+    const ps = palettes.map(p=>p[key]).filter(p=>p!=undefined);
+    return Object.assign({},...ps,inline) as NonNullable<Palette[K]>;
+}
+const DefPalette = {
+    terrain:{},
+    furniture:{},
+    items:{},
+    liquids:{},
+    monster:{},
+    nested:{},
+    vehicles:{}
+}
+type MergedPalette = Required<Omit<Palette,'id'|'type'>>;
+function getPlatte(id:OvermapTerrainID,gd:GameDataTable):MergedPalette{
+    if(PlatteTemp[id]!=null) return PlatteTemp[id]!;
+    if(omterrainIDMap ==null) return DefPalette;
     const dat = omterrainIDMap[id];
-    if(dat==null) return {terrain:{}};
+    if(dat==null) return DefPalette;
     const palettes = dat.object.palettes
-        ? dat.object.palettes.map(pid=>gd.Palette[pid])
+        ? dat.object.palettes
+            .map(pid=>gd.Palette[pid])
+            .filter(t=>t!=undefined) as Palette[]
         : [];
-    const terrainPalettes = palettes.map(p=>{
-        if(p==null) return {};
-        if(p.terrain==null) return {};
-        return p.terrain;
+    const out = Object.assign({},DefPalette,{
+        terrain     :mergePaletteKey('terrain'  ,dat,palettes),
+        furniture   :mergePaletteKey('furniture',dat,palettes),
+        items       :mergePaletteKey('items'    ,dat,palettes),
+        liquids     :mergePaletteKey('liquids'  ,dat,palettes),
+        monster     :mergePaletteKey('monster'  ,dat,palettes),
+        nested      :mergePaletteKey('nested'   ,dat,palettes),
+        vehicles    :mergePaletteKey('vehicles' ,dat,palettes),
     });
-    const terrainMap:typeof terrainPalettes[number] = Object.assign({},...terrainPalettes,dat.object.terrain??{});
-    return {terrain:terrainMap}
+    PlatteTemp[id] = out;
+    return out;
 }
 
+
+/**从调色板获取id */
+function getPaletteToF<K extends 'furniture'|'terrain'>
+    (key:K,char:string,palette:MergedPalette){
+    const mapc = palette[key]?.[char];
+    if(mapc==undefined) return;
+
+    const tid = typeof mapc == 'string'
+        ? mapc
+        : typeof mapc[0] == 'string'
+            ? mapc[0]
+            : mapc[0][0];
+    return tid;
+}
 /**将omtid转为ChunkSlotData */
 export const getChunkSlotData = (id:OvermapTerrainID,gd:GameDataTable,td:TilesetData):ChunkSlotDataMap|undefined=>{
     if(omterrainIDMap ==null) return;
-    const dat = omterrainIDMap[id];
-    if(dat==null) return;
+    const mapgen = omterrainIDMap[id];
+    if(mapgen==null) return;
     const inMapPos = {x:0,y:0};
-    if(typeof dat.om_terrain != 'string'){
-        const ylength = Array.isArray(dat.om_terrain[0])
-            ? dat.om_terrain[0].length : dat.om_terrain.length;
+    if(typeof mapgen.om_terrain != 'string'){
+        const ylength = Array.isArray(mapgen.om_terrain[0])
+            ? mapgen.om_terrain[0].length : mapgen.om_terrain.length;
 
-        const list = dat.om_terrain.flat(Infinity);
+        const list = mapgen.om_terrain.flat(Infinity);
         const i = list.indexOf(id);
         inMapPos.y = Math.floor(i/ylength);
         inMapPos.x = i%ylength;
     }
 
-    const charMap = dat.object.rows;
+    const charMap = mapgen.object.rows;
     const yslice = charMap.slice(inMapPos.y*CHUNK_SIZE.height,(inMapPos.y+1)*CHUNK_SIZE.height);
     const overslice = yslice.map(s=>s.slice(inMapPos.x*CHUNK_SIZE.width,(inMapPos.x+1)*CHUNK_SIZE.width));
 
-    const platte = getPlatte(id,gd);
+    const palette = getPlatte(id,gd);
 
-    const fill = dat.object.fill_ter;
+    const fillT = mapgen.object.fill_ter;
     const outmap:ChunkSlotDataMap = {};
+
+    //填入调色板
     for(let y=0;y<overslice.length;y++){
         const row = overslice[y];
         for(let x=0;x<row.length;x++){
             const char = row[x];
-            const mapc = platte.terrain[char];
-            if(mapc==null){
-                if(fill==null) continue;
-                outmap[`${x}_${y}`] = {terrain:td.table[fill]};
-                continue;
+
+            const slot:TileSlotData={
+                terrain:undefined,
+                furniture:undefined,
             }
-            const tid = typeof mapc == 'string'
-                ? mapc
-                : typeof mapc[0] == 'string'
-                    ? mapc[0]
-                    : mapc[0][0];
-            outmap[`${x}_${y}`] = {terrain:td.table[tid]};
+
+            //地形
+            const tid = getPaletteToF('terrain',char,palette);
+            if(tid==null && fillT!=null) slot.terrain = td.table[fillT]??null;
+            else if(tid!=null) slot.terrain = td.table[tid]??null;
+
+            //家具
+            const fid = getPaletteToF('furniture',char,palette);
+            if(fid!=null) slot.furniture = td.table[fid]??null;
+
+            outmap[`${x}_${y}`] = slot;
         }
     }
+
+    //填入place
+    mapgen.object.place_furniture?.forEach(pf=>{
+        const {x,y,chance,furn} = pf;
+        if(typeof x != 'number') return
+        if(typeof y != 'number') return
+        if(chance!=null) return
+        const slot = outmap[`${x}_${y}`]??={};
+        slot.furniture=td.table[furn]??null;
+    });
+
+
+
     return outmap;
 }
 

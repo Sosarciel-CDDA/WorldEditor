@@ -9,7 +9,7 @@ type StringSpriteData = {
     tileId:string
 };
 
-export type AnySpriteData = undefined|SpriteData|StringSpriteData;
+export type AnySpriteData = null|SpriteData|StringSpriteData;
 
 /**创建一个白色的图形对象
  * @param width - 图形的宽度。

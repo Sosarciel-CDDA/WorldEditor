@@ -3,6 +3,7 @@ import { GlobalContext, InitData } from "@/src/compoent/GlobalContext";
 import { Card } from '@zwa73/react-utils';
 import { css } from "styled-components";
 import { CanvasPanelRef } from "../CanvasPanel";
+import { DescText } from "cdda-schema";
 
 
 
@@ -17,7 +18,11 @@ const tileTooltipStyled = css`
     }
 `;
 
-
+const getTextByDesc = (str:DescText)=>{
+    return typeof str == 'string'
+        ? str
+        : str.str ?? str.str_sp ?? str.str_pl ?? str.ctxt ?? "unnamed"
+}
 
 export const TipsPanel = memo(((props:{})=>{
     const [text,setText] = useState('');
@@ -37,23 +42,35 @@ export const TipsPanel = memo(((props:{})=>{
                 setText("None");
                 return;
             }
-            const gameId = dat.terrain?.tileId;
-            if(gameId==null) {
-                setText("None");
-                return
-            }
-            const gameDat = InitData.gameDataTable.Terrain[gameId];
-            if(gameDat==undefined) return;
-            const name = typeof gameDat.name == 'string'
-                ? gameDat.name
-                : gameDat.name.str ?? gameDat.name.str_sp ?? gameDat.name.str_pl ?? gameDat.name.ctxt ?? "unnamed"
-            const display =
-                `id: ${gameDat.id}\n`+
-                `name: ${name}\n`+
-                `trans_name: ${InitData.i18NData[name]}\n`+
+
+            let displayText =
                 `chunk: (${pos.chunkX},${pos.chunkY})\n`+
                 `pos: (${pos.tileX},${pos.tileY})\n`;
-            setText(display);
+            //地形
+            (()=>{
+                const gameId = dat.terrain?.tileId;
+                if(gameId==null) return;
+                const gameDat = InitData.gameDataTable.Terrain[gameId];
+                if(gameDat==undefined) return;
+                const name = getTextByDesc(gameDat.name);
+                displayText +=
+                    `terrain_id: ${gameDat.id}\n`+
+                    `terrain_name: ${name}\n`+
+                    `terrain_trans_name: ${InitData.i18NData[name]}\n`
+            })();
+            //家具
+            (()=>{
+                const gameId = dat.furniture?.tileId;
+                if(gameId==null) return;
+                const gameDat = InitData.gameDataTable.Furniture[gameId];
+                if(gameDat==undefined) return;
+                const name = getTextByDesc(gameDat.name);
+                displayText +=
+                    `furniture_id: ${gameDat.id}\n`+
+                    `furniture_name: ${name}\n`+
+                    `furniture_trans_name: ${InitData.i18NData[name]}\n`
+            })();
+            setText(displayText);
         }, 100); // 每100毫秒检查一次全局变量的变化
 
         return () => clearInterval(interval);

@@ -1,5 +1,5 @@
 import { AnyFunc, PRecord, UtilFT } from "@zwa73/utils";
-import { AnyCddaJson, AnyItem, AnyMapgen, Monster, OverMapSpecial, Palette, Terrain } from "cdda-schema";
+import { AnyCddaJson, AnyItem, AnyMapgen, Furniture, Monster, OverMapSpecial, Palette, Terrain } from "cdda-schema";
 import { app, IpcMainInvokeEvent } from "electron";
 import path from "pathe";
 
@@ -12,6 +12,7 @@ export type GameDataTable = {
     Mapgen:AnyMapgen[];
     Palette:PRecord<string,Palette>;
     Monster:PRecord<string,Monster>;
+    Furniture:PRecord<string,Furniture>;
 }
 
 
@@ -66,7 +67,8 @@ export async function loadGameData(e:IpcMainInvokeEvent|undefined,gamePath:strin
         OvermapSpecial:{},
         Mapgen:[],
         Palette:{},
-        Monster:{}
+        Monster:{},
+        Furniture:{}
     }
 
     //#region match
@@ -91,7 +93,8 @@ export async function loadGameData(e:IpcMainInvokeEvent|undefined,gamePath:strin
                 'mapgen':t=>out.Mapgen.push(t),
                 'palette':t=>out.Palette[t.id] = t,
                 'MONSTER':t=>out.Monster[t.id] = t,
-            })
+                'furniture':t=>out.Furniture[t.id] = t,
+            });
         }
     }
     console.timeEnd('static loadGameData');

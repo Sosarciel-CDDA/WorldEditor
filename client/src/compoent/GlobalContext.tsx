@@ -47,6 +47,7 @@ export const InitData: {
         OvermapSpecial:{},
         Palette:{},
         Terrain:{},
+        Furniture:{}
     },
     i18NData:{},
 };

@@ -1,9 +1,10 @@
-import { AnySpriteData, SlotTerrain } from './SlotItem';
+import { AnySpriteData, SlotSprite } from './SlotItem';
 import { PixiNode } from './PixiInterface';
 
 
 export type TileSlotData = {
-    terrain?:AnySpriteData;
+    terrain  ?:AnySpriteData;
+    furniture?:AnySpriteData;
 }
 export type TileSlotPos = {
     tileX:number;
@@ -17,7 +18,7 @@ type TileSlotProps = {
     pos:TileSlotPos;
     data?:TileSlotData;
 };
-export class TileSlot extends PixiNode<TileSlot,SlotTerrain,TileSlotData>{
+export class TileSlot extends PixiNode<TileSlot,SlotSprite,TileSlotData>{
     pos:TileSlotPos;
     constructor(props: TileSlotProps) {
         const {data,pos} = props;
@@ -27,9 +28,17 @@ export class TileSlot extends PixiNode<TileSlot,SlotTerrain,TileSlotData>{
         this.init(pos);
     }
     init(pos:TileSlotPos){
-        const terrain = new SlotTerrain(this.dataTable.terrain,pos);
-        this.setChild('terrain',terrain);
+        const td = this.dataTable.terrain;
+        if(td!==undefined){
+            const terrain = new SlotSprite(td,pos);
+            this.setChild('terrain',terrain);
+        }
         //console.log(this.node.children);
+        const fd = this.dataTable.furniture;
+        if(fd!==undefined){
+            const furniture = new SlotSprite(fd,pos);
+            this.setChild('furniture',furniture);
+        }
 
         this.node.x = pos.tileX * pos.tileWidth;
         this.node.y = pos.tileY * pos.tileHeight;

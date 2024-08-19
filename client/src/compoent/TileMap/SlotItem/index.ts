@@ -1,2 +1,2 @@
-export * from './SlotTerrain';
+export * from './SlotSprite';
 export * from './Util';

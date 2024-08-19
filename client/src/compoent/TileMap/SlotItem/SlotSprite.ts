@@ -6,7 +6,7 @@ import { TileSlotPos } from "../TileSlot";
 
 
 
-export class SlotTerrain extends PixiUnit<SlotTerrain,AnySpriteData>{
+export class SlotSprite extends PixiUnit<SlotSprite,AnySpriteData>{
     constructor(data:AnySpriteData,pos:TileSlotPos){
         const node = new PIXI.Container;
         super(data,node);
