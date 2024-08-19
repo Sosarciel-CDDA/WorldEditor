@@ -2,7 +2,7 @@ import { FC, useCallback, useContext, useRef, useState } from "react";
 import { InputCard } from "./InputCard";
 import { BridgeHelper } from "BridgeHelper";
 import { GlobalContext, InitData } from "./GlobalContext";
-import { ToolPanel } from "./ToolPanel";
+import { ToolPanel, ToolPanelDom } from "./ToolPanel";
 import { CanvasPanelRef, CanvasPanelDom } from "./CanvasPanel";
 import { css } from "styled-components";
 import { remapOMTerrainID } from "./Util";
@@ -57,7 +57,7 @@ export const Main:FC = ()=>{
                 ref={inputDialogRef}
             />}
             {CanvasPanelDom}
-            <ToolPanel/>
+            {ToolPanelDom}
         </body>
     );
 }

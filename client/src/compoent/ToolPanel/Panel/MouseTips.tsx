@@ -1,9 +1,10 @@
-import { memo, useContext, useEffect, useState } from "react";
+import React, { forwardRef, memo, Ref, useContext, useEffect, useState } from "react";
 import { GlobalContext, InitData } from "@/src/compoent/GlobalContext";
 import { Card } from '@zwa73/react-utils';
 import { css } from "styled-components";
-import { CanvasPanelRef } from "../CanvasPanel";
+import { CanvasPanelRef } from "../../CanvasPanel";
 import { DescText } from "cdda-schema";
+import { TileSlot } from "../../TileMap";
 
 
 
@@ -24,7 +25,9 @@ const getTextByDesc = (str:DescText)=>{
         : str.str ?? str.str_sp ?? str.str_pl ?? str.ctxt ?? "unnamed"
 }
 
-export const TipsPanel = memo(((props:{})=>{
+export type MouseTips = {};
+
+const _MouseTips = forwardRef(((props:{},ref:Ref<MouseTips>)=>{
     const [text,setText] = useState('');
 
     const {inited} = useContext(GlobalContext);
@@ -32,16 +35,26 @@ export const TipsPanel = memo(((props:{})=>{
     useEffect(() => {
         console.log('TipsPanel useEffect')
         if(inited!=true) return;
+        let preTile:TileSlot|null = null;
         const interval = setInterval(() => {
             const canvas = CanvasPanelRef.current;
             if(canvas==null) return;
             const {currentTile} = canvas.getData();
             const dat = currentTile?.getDataTable();
             const pos = currentTile?.getPos();
-            if(dat==null || pos==null) {
-                setText("None");
+            if(dat==null || pos==null || currentTile==null) {
+                setText("Out Chunk");
                 return;
             }
+
+            //半透明遮罩
+            const isChange = preTile!=currentTile;
+            if(preTile!=null && isChange) preTile.fadeOut();
+            if(isChange) {
+                preTile = currentTile;
+                currentTile.fadeIn();
+            }
+
 
             let displayText =
                 `chunk: (${pos.chunkX},${pos.chunkY})\n`+
@@ -87,3 +100,11 @@ export const TipsPanel = memo(((props:{})=>{
         cardStyle={tileTooltipStyled}
     >{text}</Card>);
 }));
+
+export const {MouseTipsDom,MouseTipsRef} = (()=>{
+    const ref = React.createRef<MouseTips>();
+    return{
+        MouseTipsDom:<_MouseTips ref={ref}/>,
+        MouseTipsRef:ref,
+    }
+})();

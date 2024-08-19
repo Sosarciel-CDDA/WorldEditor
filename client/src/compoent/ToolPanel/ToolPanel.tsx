@@ -1,6 +1,6 @@
 import { css } from "styled-components"
-import { TipsPanel } from "./TipsPanel"
-import { FC, useCallback, useContext, useRef } from "react"
+import { MouseTipsDom } from "./Panel"
+import React, { FC, forwardRef, Ref, useCallback, useContext, useRef } from "react"
 import { InputCard } from "../InputCard"
 import { GlobalContext, InitData } from "../GlobalContext"
 import { Card } from "@zwa73/react-utils"
@@ -55,9 +55,9 @@ const ZAxisDescStyled = css`
 `;
 
 type ToolPanelProps = {}
+export type ToolPanel = {};
 
-
-export const ToolPanel:FC<ToolPanelProps> = (props:ToolPanelProps)=>{
+const _ToolPanel = forwardRef((props:ToolPanelProps,ref:Ref<ToolPanel>)=>{
     const {} = props;
     const {inited} = useContext(GlobalContext);
 
@@ -139,6 +139,14 @@ export const ToolPanel:FC<ToolPanelProps> = (props:ToolPanelProps)=>{
             descStyle={ZAxisDescStyled}
             ref={zAxisInputRef}
         />
-        <TipsPanel/>
+        {MouseTipsDom}
     </Card>)
-}
+});
+
+export const {ToolPanelDom,ToolPanelRef} = (()=>{
+    const ToolPanelRef = React.createRef<ToolPanel>();
+    return {
+        ToolPanelDom:<_ToolPanel ref={ToolPanelRef}/>,
+        ToolPanelRef,
+    }
+})();

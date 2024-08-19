@@ -17,6 +17,7 @@ export type CanvasPanelData = {
     inLeftDown? :boolean;
     hover?      :boolean;
     vp?         :Viewport;
+    app?        :PIXI.Application;
     zoneMap?    :ZoneMap;
 };
 
@@ -46,7 +47,7 @@ const _CanvasPanel = forwardRef((props:{},ref:Ref<CanvasPanel>)=>{
 
             app.ticker.maxFPS = 30;
             app.ticker.minFPS = 20;
-
+            refData.current.app = app;
             if (canvasRef.current)
                 canvasRef.current.appendChild(app.canvas);
 
@@ -95,7 +96,14 @@ const _CanvasPanel = forwardRef((props:{},ref:Ref<CanvasPanel>)=>{
             return () => {
                 viewport.off('mousemove', handleMouseMove);
                 window.removeEventListener("resize", handleResize);
-                app.destroy(true, { children: true });
+                app.destroy(true, {
+                    children: true,
+                    texture:true,
+                    textureSource:true,
+                    context:true,
+                    style:true,
+                });
+                console.log('destory app');
             };
         })();
     }, []);
