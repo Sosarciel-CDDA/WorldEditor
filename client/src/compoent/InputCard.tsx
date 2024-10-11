@@ -89,7 +89,6 @@ export const InputCard = forwardRef((props: InputDialogProps, ref: Ref<InputCard
     };
 
     return (
-        <>
         <Card cardStyle={OverlayStyle.concat(overlayStyle)}>
             <TextDiv $dynstyle={descStyle}>{desc}</TextDiv>
             <Input
@@ -105,6 +104,5 @@ export const InputCard = forwardRef((props: InputDialogProps, ref: Ref<InputCard
                 content="Submits"
             />
         </Card>
-        </>
     );
 });

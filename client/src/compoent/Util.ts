@@ -7,6 +7,10 @@ import { SpriteData, TilesetData } from "@/src/static/TilesetLoader";
 import { PRecord } from "@zwa73/utils";
 import * as PIXI from 'pixi.js';
 
+/**打印警告 */
+export function pwarn(...dat:any[]){
+    return console.log(...dat);
+}
 
 const omterrainIDMap:PRecord<string,Mapgen> = {};
 /**预处理omterrain */
@@ -44,7 +48,7 @@ export const getOMSSize = (oms:OverMapSpecial)=>{
 
 
 /**omtid : platte */
-const PlatteTemp:PRecord<string,MergedPalette>={};
+const PaletteTemp:PRecord<string,MergedPalette>={};
 function mergePaletteKey<K extends (keyof Palette&keyof Mapgen['object'])>
     (key:K,mapgen:Mapgen,palettes:Palette[]){
     const inline = mapgen.object[key] ?? {}as NonNullable<Palette[K]>;
@@ -61,11 +65,13 @@ const DefPalette = {
     vehicles:{}
 }
 type MergedPalette = Required<Omit<Palette,'id'|'type'>>;
-function getPlatte(id:OvermapTerrainID,gd:GameDataTable):MergedPalette{
-    if(PlatteTemp[id]!=null) return PlatteTemp[id]!;
-    if(omterrainIDMap ==null) return DefPalette;
+function getPalette(id:OvermapTerrainID,gd:GameDataTable):MergedPalette{
+    if(PaletteTemp[id]!=null) return PaletteTemp[id]!;
     const dat = omterrainIDMap[id];
-    if(dat==null) return DefPalette;
+    if(dat==null){
+        pwarn(`can't find palette data ${id}`);
+        return DefPalette;
+    }
     const palettes = dat.object.palettes
         ? dat.object.palettes
             .map(pid=>gd.Palette[pid])
@@ -80,7 +86,7 @@ function getPlatte(id:OvermapTerrainID,gd:GameDataTable):MergedPalette{
         nested      :mergePaletteKey('nested'   ,dat,palettes),
         vehicles    :mergePaletteKey('vehicles' ,dat,palettes),
     });
-    PlatteTemp[id] = out;
+    PaletteTemp[id] = out;
     return out;
 }
 
@@ -100,9 +106,11 @@ function getPaletteToF<K extends 'furniture'|'terrain'>
 }
 /**将omtid转为ChunkSlotData */
 export const getChunkSlotData = (id:OvermapTerrainID,gd:GameDataTable,td:TilesetData):ChunkSlotDataMap|undefined=>{
-    if(omterrainIDMap ==null) return;
     const mapgen = omterrainIDMap[id];
-    if(mapgen==null) return;
+    if(mapgen==null){
+        pwarn(`can't find omt data ${id}`);
+        return;
+    }
     const inMapPos = {x:0,y:0};
     if(typeof mapgen.om_terrain != 'string'){
         const ylength = Array.isArray(mapgen.om_terrain[0])
@@ -118,9 +126,9 @@ export const getChunkSlotData = (id:OvermapTerrainID,gd:GameDataTable,td:Tileset
     const yslice = charMap.slice(inMapPos.y*CHUNK_SIZE.height,(inMapPos.y+1)*CHUNK_SIZE.height);
     const overslice = yslice.map(s=>s.slice(inMapPos.x*CHUNK_SIZE.width,(inMapPos.x+1)*CHUNK_SIZE.width));
 
-    const palette = getPlatte(id,gd);
+    const palette = getPalette(id,gd);
 
-    const fillT = mapgen.object.fill_ter;
+    const fillid = mapgen.object.fill_ter;
     const outmap:ChunkSlotDataMap = {};
 
     //填入调色板
@@ -133,8 +141,9 @@ export const getChunkSlotData = (id:OvermapTerrainID,gd:GameDataTable,td:Tileset
 
             //地形
             const tid = getPaletteToF('terrain',char,palette);
-            if(tid==null && fillT!=null) slot.terrain = td.table[fillT]??{tileId:fillT};
-            else if(tid!=null) slot.terrain = td.table[tid]??{tileId:tid};
+            if(tid!=null) slot.terrain = td.table[tid]??{tileId:tid};
+            else if(fillid!=null) slot.terrain = td.table[fillid]??{tileId:fillid};
+            else pwarn(`can't find "${char}" in palette`);
 
             //家具
             const fid = getPaletteToF('furniture',char,palette);
@@ -160,14 +169,21 @@ export const getChunkSlotData = (id:OvermapTerrainID,gd:GameDataTable,td:Tileset
 /**将omsid转为ZoneChunkData */
 export const getZoneChunkData = (id:OvermapTerrainID,gd:GameDataTable,td:TilesetData):ZoneChunkDataMap|undefined=>{
     const oms = gd.OvermapSpecial[id];
-    if(oms==null) return;
+    if(oms==null){
+        pwarn(`can't find oms data ${id}`);
+        return;
+    }
     const omslist = oms.overmaps;
     const outmap:ZoneChunkDataMap={};
     omslist.forEach(o=>{
         const [x,y,z] = o.point;
         const oidWd = o.overmap;
+        if(oidWd==null) return;
         const match = oidWd.match(/^(.+?)_(north|south|east|west)$/);
-        if(match==null) return;
+        if(match==null){
+            pwarn(`can't parse direction id ${oidWd}`);
+            return;
+        }
         const overmapTerrainID = match[1];
         const direction = match[2];
         outmap[`${x}_${y}_${z}`] = getChunkSlotData(overmapTerrainID,gd,td);

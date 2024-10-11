@@ -26,7 +26,8 @@ export const Main:FC = ()=>{
         (async ()=>{
             if (!inputDialogRef.current) return;
             //const text = inputDialogRef.current.getText();
-            const text = "H:/CDDA/cdda-windows-tiles-x64-2023-05-08-0608/";
+            //const text = "H:/CDDA/cdda-windows-tiles-x64-2023-05-08-0608/";
+            const text = "H:/CDDA/newver11/cdda-windows-tiles-sounds-x64-2024-07-02-0131";
             setInputVisible(false);
 
             console.time('client init');
