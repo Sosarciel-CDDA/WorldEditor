@@ -47,9 +47,9 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@sosarciel-cdda/cdda-schema": "file:../../Schema/build/sosarciel-cdda-cdda-schema-1.0.0.tgz",
     "@zwa73/react-utils": "^1.0.1",
     "@zwa73/utils": "*",
-    "cdda-schema": "file:../../CDDA-Schema",
     "electron-squirrel-startup": "^1.0.1",
     "gettext-parser": "^8.0.0",
     "glob": "^7.2.3",
