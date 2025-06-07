@@ -1,5 +1,5 @@
 import { AnyFunc, PRecord, UtilFT } from "@zwa73/utils";
-import { AnyCddaJson, AnyItem, AnyMapgen, Furniture, Monster, OverMapSpecial, Palette, Terrain } from "cdda-schema";
+import { AnyCddaJson, AnyItem, AnyMapgen, Furniture, Monster, OverMapSpecial, Palette, Terrain } from "@sosarciel-cdda/schema";
 import { app, IpcMainInvokeEvent } from "electron";
 import path from "pathe";
 

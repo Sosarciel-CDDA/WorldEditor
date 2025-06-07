@@ -1,11 +1,7 @@
 import React, { createContext, useState, ReactNode } from 'react';
 import { TilesetData } from '@/src/static/TilesetLoader';
-import { TileSlot, ZoneMap } from './TileMap';
 import { GameDataTable } from '@/src/static/DataLoader';
 import { PRecord } from '@zwa73/utils';
-import { AnyMapgen, Mapgen } from 'cdda-schema';
-import { CanvasPanelRef } from './CanvasPanel';
-import * as PIXI from 'pixi.js';
 
 
 

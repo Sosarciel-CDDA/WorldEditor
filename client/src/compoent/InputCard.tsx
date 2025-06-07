@@ -99,7 +99,7 @@ export const InputCard = forwardRef((props: InputDialogProps, ref: Ref<InputCard
                 placeholder="Enter some text"
             />
             <Button
-                handleButtonClick={onClick}
+                onClick={onClick}
                 cardStyle={ButtonStyle.concat(buttonStyle)}
                 content="Submits"
             />

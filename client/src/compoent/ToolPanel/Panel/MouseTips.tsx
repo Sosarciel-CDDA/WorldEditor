@@ -1,9 +1,9 @@
-import React, { forwardRef, memo, Ref, useContext, useEffect, useState } from "react";
+import React, { forwardRef, Ref, useContext, useEffect, useState } from "react";
 import { GlobalContext, InitData } from "@/src/compoent/GlobalContext";
 import { Card } from '@zwa73/react-utils';
 import { css } from "styled-components";
 import { CanvasPanelRef } from "../../CanvasPanel";
-import { DescText } from "cdda-schema";
+import { DescText } from "@sosarciel-cdda/schema";
 import { TileSlot } from "../../TileMap";
 
 

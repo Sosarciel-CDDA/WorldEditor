@@ -1,4 +1,4 @@
-import { AnyMapgen, Mapgen, OverMapSpecial, OvermapTerrainID, Palette, TerrainID } from "cdda-schema";
+import { AnyMapgen, Mapgen, OverMapSpecial, OvermapTerrainID, Palette, TerrainID } from "@sosarciel-cdda/schema";
 import { CHUNK_SIZE } from "./GlobalContext";
 import { GameDataTable } from "../static/DataLoader";
 import { ChunkSlotDataMap } from "./TileMap/Chunk";
