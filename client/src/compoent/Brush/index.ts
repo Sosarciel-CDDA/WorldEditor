@@ -10,7 +10,7 @@ export const BrushSharedData:{
     brushSlot?:string;
 }={
     brushMode:'pencil',
-}
+};
 export function BrushRoute(props:BrushProps){
     switch(BrushSharedData.brushMode){
         case 'pencil':

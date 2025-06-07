@@ -49,4 +49,4 @@ export const InitData: {
 };
 
 //(window as any).gvp={}
-export const CHUNK_SIZE = {width:24,height:24}
+export const CHUNK_SIZE = {width:24,height:24};

@@ -1,35 +1,14 @@
-// preload.ts (预加载脚本)
-import { contextBridge, ipcRenderer } from 'electron';
-import { Bridge } from './index';
+import { contextBridge, ipcRenderer, webUtils } from 'electron';
+import type { BridgeDefine } from './index';
 
+/**预加载后端桥对象 */
+const BridgePreload = new Promise(async (resolve) =>
+    resolve(((await ipcRenderer.invoke("getBridgeKeys")) as string[])
+        .map((k) => [k, async (...args: any) => await ipcRenderer.invoke(k, ...args)] as const)
+        .reduce((acc, [k, v]) => ({ ...acc, [k]: v }), {} as any as BridgeDefine)));
 
-const BridgeBase:Bridge = {
-    getAppPath: async () => {
-        return await ipcRenderer.invoke('getAppPath');
-    },
-    test: async () => {
-        return await ipcRenderer.invoke('test');
-    },
-    loadTileset: async (gamePath,gfxName) => {
-        //console.time('bridge loadTileset');
-        const out = await ipcRenderer.invoke('loadTileset',gamePath,gfxName);
-        //console.timeEnd('bridge loadTileset');
-        return out;
-    },
-    loadGameData: async (gamePath) => {
-        //console.time('bridge loadGameData');
-        const out = await ipcRenderer.invoke('loadGameData',gamePath);
-        //console.timeEnd('bridge loadGameData');
-        return out;
-    },
-    loadI18NData: async (gamePath,langFlag)=>{
-        //console.time('bridge loadI18NData');
-        const out = await ipcRenderer.invoke('loadI18NData',gamePath,langFlag);
-        //console.timeEnd('bridge loadI18NData');
-        return out;
-    }
-};
+//暴露后端桥对象
+contextBridge.exposeInMainWorld('bridge', BridgePreload);
 
-contextBridge.exposeInMainWorld('electron', BridgeBase);
-
-
+//暴露webUtils
+contextBridge.exposeInMainWorld('webUtils', webUtils);

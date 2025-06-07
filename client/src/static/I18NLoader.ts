@@ -53,7 +53,7 @@ export async function loadI18NData(e:IpcMainInvokeEvent|undefined,gamePath:strin
     return out;
 }
 
-if(false)(async()=>{
+if(false)void (async()=>{
     console.time('load4');
     const d = await loadI18NData(undefined,
         'H:/CDDA/cdda-windows-tiles-x64-2023-05-08-0608/',
@@ -61,10 +61,10 @@ if(false)(async()=>{
     );
     console.log(d['rock']);
     console.timeEnd('load4');
-    console.log(123)
+    console.log(123);
 })();
 
-if(false)(async ()=>{
+if(false)void (async ()=>{
     const langPatj = path.join('H:/CDDA/cdda-windows-tiles-x64-2023-05-08-0608/','lang','mo');
     const list = await fs.promises.readdir(langPatj);
     console.log(list.join(`"|"`));

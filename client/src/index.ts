@@ -42,7 +42,7 @@ const createWindow = (): void => {
     });
 
     // and load the index.html of the app.
-    mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+    void mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
@@ -59,7 +59,7 @@ Object.entries(FuncObj).forEach(([k, v]) => {
 
 type RemoveFirstArg<T> = T extends (arg1: IpcMainInvokeEvent, ...args: infer Rest) => infer R ? (...args: Rest) => R : T;
 
-export type Bridge = {
+export type BridgeDefine = {
     [P in keyof FuncObj]: FuncObj[P] extends (...args: infer Arg) => infer Out
         ? RemoveFirstArg<(...args: Arg) => Promise<Out>>
         : never;

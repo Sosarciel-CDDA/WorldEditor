@@ -8,7 +8,7 @@ export function parseSlotPos(pos:TileSlotPos){
     return {
         x:CHUNK_SIZE.width*pos.chunkX+pos.tileX,
         y:CHUNK_SIZE.height*pos.chunkY+pos.tileY
-    }
+    };
 }
 
 export type ZoneMapPos = {
@@ -46,7 +46,7 @@ export class ZoneMap extends PixiNode<ZoneMap,Chunk,ZoneChunkDataMap>{
         if(chunk==undefined) return;
         return chunk.getSlot(pos.tileX,pos.tileY);
     }
-    setSlotByWorldPos(data:TileSlotData|undefined,x:number,y:number,z:number=this.currZ){
+    async setSlotByWorldPos(data:TileSlotData|undefined,x:number,y:number,z:number=this.currZ){
         const pos = this.parseGlobalPos(x,y);
         const chunk = this.getChunk(pos.chunkX,pos.chunkY,z);
         if(chunk==undefined) return;
@@ -82,6 +82,6 @@ export class ZoneMap extends PixiNode<ZoneMap,Chunk,ZoneChunkDataMap>{
             tileX  : Math.floor(x%cw/this.pos.tileWidth),
             tileY  : Math.floor(y%ch/this.pos.tileHeight),
             x,y
-        }
+        };
     }
 }

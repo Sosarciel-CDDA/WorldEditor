@@ -71,7 +71,7 @@ const TextDiv = styled.div<DynStyleable>`
     overflow: hidden;
     text-overflow: ellipsis;
     ${parseDynStyle}
-`
+`;
 
 export const InputCard = forwardRef((props: InputDialogProps, ref: Ref<InputCard>)=>{
 

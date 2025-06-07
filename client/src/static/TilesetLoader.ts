@@ -126,11 +126,11 @@ export const loadTileset = async (e:IpcMainInvokeEvent|undefined,gamePath:string
                     ofsty: column* fd.tileHeight,
                     width:fd.width,
                     height:fd.height,
-                }
+                };
             }
         }
         return undefined;
-    }
+    };
 
     for(const tnew of tnews){
         const tiles = tnew.tiles;
@@ -165,12 +165,12 @@ export const loadTileset = async (e:IpcMainInvokeEvent|undefined,gamePath:string
         table:out,
         info:tbase
     };
-}
+};
 
-if(false)(async()=>{
+if(false)void (async()=>{
     console.time('load');
     const d = await loadTileset(undefined,
         'H:/CDDA/cdda-windows-tiles-x64-2023-05-08-0608/','MSX++UnDeadPeopleEdition'
     );
     console.log(d.table['mon_dragon_dummy']);
-})()
+})();

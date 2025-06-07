@@ -37,7 +37,7 @@ const _CanvasPanel = forwardRef((props:{},ref:Ref<CanvasPanel>)=>{
     useEffect(() => {
         console.log('CanvasPanel useEffect');
         if(!canvasRef.current) return;
-        (async ()=>{
+        void (async ()=>{
             const app = new PIXI.Application();
             await app.init({
                 width: window.innerWidth,
@@ -142,7 +142,7 @@ const _CanvasPanel = forwardRef((props:{},ref:Ref<CanvasPanel>)=>{
             }));
 
         const zp = new ZoneMap({ pos: data, chunkDataMap });
-        (async ()=>{
+        void (async ()=>{
             const node = await zp.getNode();
             vp.addChild(node);
             refData.current.zoneMap=zp;
@@ -166,7 +166,7 @@ const _CanvasPanel = forwardRef((props:{},ref:Ref<CanvasPanel>)=>{
     const localRef = {initMap,changeZ,getData};
     //#endregion
     useImperativeHandle(ref,()=>localRef);
-    console.log('rendering CanvasPanel')
+    console.log('rendering CanvasPanel');
 
     return(
         <div style={styled}
@@ -177,7 +177,7 @@ const _CanvasPanel = forwardRef((props:{},ref:Ref<CanvasPanel>)=>{
             onMouseUp={handleMouseLeave}
             onMouseMove={handleMouseMove}
         />
-    )
+    );
 });
 
 export const {CanvasPanelRef,CanvasPanelDom} = (()=>{
@@ -186,6 +186,6 @@ export const {CanvasPanelRef,CanvasPanelDom} = (()=>{
     return{
         CanvasPanelDom:dom,
         CanvasPanelRef:ref
-    }
+    };
 })();
 

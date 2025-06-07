@@ -1,6 +1,6 @@
 import { FC, useCallback, useContext, useRef, useState } from "react";
 import { InputCard } from "./InputCard";
-import { BridgeHelper } from "BridgeHelper";
+import { BridgeProxy } from "BridgeHelper";
 import { GlobalContext, InitData } from "./GlobalContext";
 import { ToolPanel, ToolPanelDom } from "./ToolPanel";
 import { CanvasPanelRef, CanvasPanelDom } from "./CanvasPanel";
@@ -23,7 +23,7 @@ export const Main:FC = ()=>{
     const {setInited} = useContext(GlobalContext);
 
     const handleInputSubmit = useCallback(() => {
-        (async ()=>{
+        void (async ()=>{
             if (!inputDialogRef.current) return;
             //const text = inputDialogRef.current.getText();
             //const text = "H:/CDDA/cdda-windows-tiles-x64-2023-05-08-0608/";
@@ -32,9 +32,9 @@ export const Main:FC = ()=>{
 
             console.time('client init');
             const [tilesetData,gameData,i18n] = await Promise.all([
-                BridgeHelper.loadTileset(text,'MSX++UnDeadPeopleEdition'),
-                BridgeHelper.loadGameData(text),
-                BridgeHelper.loadI18NData(text,'zh_CN'),
+                BridgeProxy.loadTileset(text,'MSX++UnDeadPeopleEdition'),
+                BridgeProxy.loadGameData(text),
+                BridgeProxy.loadI18NData(text,'zh_CN'),
             ]);
             InitData.tilesetData = tilesetData;
             InitData.gameDataTable = gameData;
@@ -44,7 +44,7 @@ export const Main:FC = ()=>{
             setInited(true);
         })();
     },[]);
-    console.log('rendering Main')
+    console.log('rendering Main');
 
     return (
         <body
@@ -61,4 +61,4 @@ export const Main:FC = ()=>{
             {ToolPanelDom}
         </body>
     );
-}
+};

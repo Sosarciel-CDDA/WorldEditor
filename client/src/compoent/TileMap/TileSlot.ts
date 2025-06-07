@@ -71,7 +71,7 @@ export class TileSlot extends PixiNode<TileSlot,SlotSprite,TileSlotData>{
                 tile.alpha = 0.5;
                 app.ticker.remove(fadeInProcess);
             }
-        }
+        };
         if(this.currAnim!=null) app.ticker.remove(this.currAnim);
         this.currAnim = fadeInProcess;
         app.ticker.add(fadeInProcess);
@@ -93,7 +93,7 @@ export class TileSlot extends PixiNode<TileSlot,SlotSprite,TileSlotData>{
                 .removeChild(tile)
                 .destroy();
             this.animTile = undefined;
-        }
+        };
 
         if(this.currAnim!=null) app.ticker.remove(this.currAnim);
         app.ticker.add(fadeOutProcess);

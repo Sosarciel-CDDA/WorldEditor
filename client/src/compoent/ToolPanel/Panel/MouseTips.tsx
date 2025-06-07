@@ -22,8 +22,8 @@ const tileTooltipStyled = css`
 const getTextByDesc = (str:DescText)=>{
     return typeof str == 'string'
         ? str
-        : str.str ?? str.str_sp ?? str.str_pl ?? str.ctxt ?? "unnamed"
-}
+        : str.str ?? str.str_sp ?? str.str_pl ?? str.ctxt ?? "unnamed";
+};
 
 export type MouseTips = {};
 
@@ -33,7 +33,7 @@ const _MouseTips = forwardRef(((props:{},ref:Ref<MouseTips>)=>{
     const {inited} = useContext(GlobalContext);
 
     useEffect(() => {
-        console.log('TipsPanel useEffect')
+        console.log('TipsPanel useEffect');
         if(inited!=true) return;
         let preTile:TileSlot|null = null;
         const interval = setInterval(() => {
@@ -65,14 +65,14 @@ const _MouseTips = forwardRef(((props:{},ref:Ref<MouseTips>)=>{
                 if(gameId==null) return;
                 const gameDat = InitData.gameDataTable.Terrain[gameId];
                 if(gameDat==undefined) {
-                    displayText += `terrain_id: ${gameId}\n`
+                    displayText += `terrain_id: ${gameId}\n`;
                     return;
                 }
                 const name = getTextByDesc(gameDat.name);
                 displayText +=
                     `terrain_id: ${gameDat.id}\n`+
                     `terrain_name: ${name}\n`+
-                    `terrain_trans_name: ${InitData.i18NData[name]}\n`
+                    `terrain_trans_name: ${InitData.i18NData[name]}\n`;
             })();
             //家具
             (()=>{
@@ -80,21 +80,21 @@ const _MouseTips = forwardRef(((props:{},ref:Ref<MouseTips>)=>{
                 if(gameId==null) return;
                 const gameDat = InitData.gameDataTable.Furniture[gameId];
                 if(gameDat==undefined) {
-                    displayText += `furniture_id: ${gameId}\n`
+                    displayText += `furniture_id: ${gameId}\n`;
                     return;
                 }
                 const name = getTextByDesc(gameDat.name);
                 displayText +=
                     `furniture_id: ${gameDat.id}\n`+
                     `furniture_name: ${name}\n`+
-                    `furniture_trans_name: ${InitData.i18NData[name]}\n`
+                    `furniture_trans_name: ${InitData.i18NData[name]}\n`;
             })();
             setText(displayText.trim());
         }, 100); // 每100毫秒检查一次全局变量的变化
 
         return () => clearInterval(interval);
     }, [inited]);
-    console.log('rendering TipsPanel')
+    console.log('rendering TipsPanel');
 
     return (<Card
         cardStyle={tileTooltipStyled}
@@ -106,5 +106,5 @@ export const {MouseTipsDom,MouseTipsRef} = (()=>{
     return{
         MouseTipsDom:<_MouseTips ref={ref}/>,
         MouseTipsRef:ref,
-    }
+    };
 })();

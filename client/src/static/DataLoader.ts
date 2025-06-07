@@ -31,14 +31,14 @@ async function loadJsonAndCache(gamePath:string){
     const approot = app==undefined ? process.cwd() : app.getAppPath();
     const cachePath = path.join(approot,'cache','gamedata.json');
     if(await UtilFT.pathExists(cachePath))
-        return [await UtilFT.loadJSONFile(cachePath)] as AnyCddaJson[]
+        return [await UtilFT.loadJSONFile(cachePath)] as AnyCddaJson[];
 
     const baseJson = path.join(gamePath,'data','json');
     const baseFiles = await UtilFT.fileSearchRegex(baseJson,'.*\\.json');
-    const baseJsons = await Promise.all(baseFiles.map(fp=>
+    const baseJsons = await Promise.all(baseFiles.map(async fp=>
         UtilFT.loadJSONFile(fp) as Promise<AnyCddaJson|AnyCddaJson[]>
     ));
-    UtilFT.writeJSONFile(cachePath,baseJsons.reduce((acc:AnyCddaJson[],curr)=>{
+    await UtilFT.writeJSONFile(cachePath,baseJsons.reduce((acc:AnyCddaJson[],curr)=>{
         if(typeof curr != 'object') return acc;
         if(Array.isArray(curr)) return [...acc,...curr];
         return  [...acc,curr];
@@ -69,7 +69,7 @@ export async function loadGameData(e:IpcMainInvokeEvent|undefined,gamePath:strin
         Palette:{},
         Monster:{},
         Furniture:{}
-    }
+    };
 
     //#region match
     const addItem = (item:AnyItem)=>out.Item[item.id] = item;
@@ -78,7 +78,7 @@ export async function loadGameData(e:IpcMainInvokeEvent|undefined,gamePath:strin
         'ARMOR':addItem,'COMESTIBLE':addItem,
         'GUN':addItem,'GUNMOD':addItem,
         'MAGAZINE':addItem,'TOOL':addItem,
-    }
+    };
     //#endregion
 
     for(const json of baseJsons){
@@ -103,12 +103,12 @@ export async function loadGameData(e:IpcMainInvokeEvent|undefined,gamePath:strin
 
 
 
-if(false)(async()=>{
+if(false)void (async()=>{
     console.time('load4');
     const d = await loadGameData(undefined,
         'H:/CDDA/cdda-windows-tiles-x64-2023-05-08-0608/'
     );
     console.log(d.Item['rock']);
     console.timeEnd('load4');
-    console.log(111213)
-})()
+    console.log(111213);
+})();

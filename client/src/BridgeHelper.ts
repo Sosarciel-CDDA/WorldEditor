@@ -1,9 +1,9 @@
-import { Bridge } from "./index";
+import type { webUtils } from "electron";
+import type { BridgeDefine } from "@";
 
-
-
-
-export const BridgeHelper:Bridge = {} as any;
-for (const key in (window as any).electron)
-    (BridgeHelper as any)[key] = (window as any).electron[key];
-
+/**前端桥对象 */
+export type BridgeProxy = BridgeDefine;
+export const BridgeProxy:BridgeProxy = new Proxy({},{
+    get: (target, prop) => async (...args:any) =>
+        (await (window as any).bridge)[prop](...args)
+}) as any;

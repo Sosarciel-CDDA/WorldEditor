@@ -1,12 +1,12 @@
-import { css } from "styled-components"
-import { MouseTipsDom } from "./Panel"
-import React, { FC, forwardRef, Ref, useCallback, useContext, useRef } from "react"
-import { InputCard } from "../InputCard"
-import { GlobalContext, InitData } from "../GlobalContext"
-import { Card } from "@zwa73/react-utils"
-import { getOMSSize, getZoneChunkData } from "../Util"
-import { BrushSharedData } from "../Brush"
-import { CanvasPanelRef } from "../CanvasPanel"
+import { css } from "styled-components";
+import { MouseTipsDom } from "./Panel";
+import React, { FC, forwardRef, Ref, useCallback, useContext, useRef } from "react";
+import { InputCard } from "../InputCard";
+import { GlobalContext, InitData } from "../GlobalContext";
+import { Card } from "@zwa73/react-utils";
+import { getOMSSize, getZoneChunkData } from "../Util";
+import { BrushSharedData } from "../Brush";
+import { CanvasPanelRef } from "../CanvasPanel";
 
 
 
@@ -106,13 +106,13 @@ const _ToolPanel = forwardRef((props:ToolPanelProps,ref:Ref<ToolPanel>)=>{
         const num = Number(zAxisInputRef.current?.getText());
         if(isNaN(num) || num ==null) return;
         if(canvas==null) return;
-        canvas.changeZ(num);
+        void canvas.changeZ(num);
     },[]);
     //#endregion
 
 
 
-    console.log('rendering ToolPanel')
+    console.log('rendering ToolPanel');
 
     return(<Card cardStyle={StyledToolPanel}>
         <InputCard
@@ -140,7 +140,7 @@ const _ToolPanel = forwardRef((props:ToolPanelProps,ref:Ref<ToolPanel>)=>{
             ref={zAxisInputRef}
         />
         {MouseTipsDom}
-    </Card>)
+    </Card>);
 });
 
 export const {ToolPanelDom,ToolPanelRef} = (()=>{
@@ -148,5 +148,5 @@ export const {ToolPanelDom,ToolPanelRef} = (()=>{
     return {
         ToolPanelDom:<_ToolPanel ref={ToolPanelRef}/>,
         ToolPanelRef,
-    }
+    };
 })();

@@ -42,7 +42,7 @@ export class PixiNode<
             context:true,
             style:true,
             texture:true
-        }))
+        }));
     }
     /**设置子元素 */
     setChild(key:keyof D&string,child:C){

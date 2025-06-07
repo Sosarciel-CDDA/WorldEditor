@@ -1,1 +1,1 @@
-export * from './MouseTips'
+export * from './MouseTips';

@@ -11,6 +11,7 @@ export class SlotSprite extends PixiUnit<SlotSprite,AnySpriteData>{
         const node = new PIXI.Container;
         super(data,node);
         getSprite(data,pos)
-            .then(s=>node.addChild(s));
+            .then(s=>node.addChild(s))
+            .catch(err=>{throw new Error(`SlotSprite getSprite error: ${err}`);});
     }
 }

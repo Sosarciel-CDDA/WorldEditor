@@ -23,7 +23,7 @@ export const remapOMTerrainID = (mapgen:AnyMapgen[])=>{
             //if(omlist.includes('p_resort_1ne')) console.log('includes(p_resort_1ne)');
             omlist.forEach(id => omterrainIDMap[id as string]=fixt);
         });
-}
+};
 /**获取 overmap special 地图大小 */
 export const getOMSSize = (oms:OverMapSpecial)=>{
     const size = {
@@ -33,7 +33,7 @@ export const getOMSSize = (oms:OverMapSpecial)=>{
         maxChunkY:0,
         minChunkZ:0,
         maxChunkZ:0,
-    }
+    };
     oms.overmaps.forEach(o=>{
         const [x,y,z] = o.point;
         size.maxChunkX = Math.max(x,size.maxChunkX);
@@ -63,7 +63,7 @@ const DefPalette = {
     monster:{},
     nested:{},
     vehicles:{}
-}
+};
 type MergedPalette = Required<Omit<Palette,'id'|'type'>>;
 function getPalette(id:OvermapTerrainID,gd:GameDataTable):MergedPalette{
     if(PaletteTemp[id]!=null) return PaletteTemp[id]!;
@@ -164,7 +164,7 @@ export const getChunkSlotData = (id:OvermapTerrainID,gd:GameDataTable,td:Tileset
     });
 
     return outmap;
-}
+};
 
 /**将omsid转为ZoneChunkData */
 export const getZoneChunkData = (id:OvermapTerrainID,gd:GameDataTable,td:TilesetData):ZoneChunkDataMap|undefined=>{
@@ -192,7 +192,7 @@ export const getZoneChunkData = (id:OvermapTerrainID,gd:GameDataTable,td:Tileset
         //console.log(outmap[`${x}_${y}`])
     });
     return outmap;
-}
+};
 
 
 /**纹理文件资源缓存 */

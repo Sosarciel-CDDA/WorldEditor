@@ -17,10 +17,10 @@ export function Pencil(props:BrushProps){
     const bid = BrushSharedData.brushSlot=="null" ? undefined
         : BrushSharedData.brushSlot ?? undefined;
     if(bid==null && odat?.terrain?.tileId==undefined){
-        map.setSlotByWorldPos(undefined,x,y);
+        void map.setSlotByWorldPos(undefined,x,y);
         return;
     }
     const ndat = bid == undefined ? undefined : InitData.tilesetData.table[bid];
     if(odat?.terrain?.tileId != ndat?.tileId)
-        map.setSlotByWorldPos({terrain:ndat},x,y);
+        void map.setSlotByWorldPos({terrain:ndat},x,y);
 }
