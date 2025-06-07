@@ -2,7 +2,7 @@ import { IpcMainInvokeEvent } from 'electron';
 import gettextParser  from 'gettext-parser';
 import path from 'pathe';
 import fs from 'fs';
-import { PRecord } from '@zwa73/utils';
+import type { PRecord } from '@zwa73/utils';
 
 
 

@@ -1,10 +1,10 @@
-import { AnyMapgen, Mapgen, OverMapSpecial, OvermapTerrainID, Palette, TerrainID } from "@sosarciel-cdda/schema";
+import type { AnyMapgen, Mapgen, OverMapSpecial, OvermapTerrainID, Palette, TerrainID } from "@sosarciel-cdda/schema";
 import { CHUNK_SIZE } from "./GlobalContext";
-import { GameDataTable } from "../Backend/DataLoader";
+import type { GameDataTable } from "Backend";
 import { ChunkSlotDataMap } from "./TileMap/Chunk";
 import { TileSlotData, ZoneChunkDataMap } from "./TileMap";
 import { SpriteData, TilesetData } from "@/src/Backend/TilesetLoader";
-import { PRecord } from "@zwa73/utils";
+import type { PRecord } from "@zwa73/utils";
 import * as PIXI from 'pixi.js';
 
 /**打印警告 */

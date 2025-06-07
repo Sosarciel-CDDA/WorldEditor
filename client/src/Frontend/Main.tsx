@@ -47,7 +47,7 @@ export const Main:FC = ()=>{
     console.log('rendering Main');
 
     return (
-        <body
+        <div
             style={{overflow:'hidden'}}
         >
             {inputVisible && <InputCard
@@ -59,6 +59,6 @@ export const Main:FC = ()=>{
             />}
             {CanvasPanelDom}
             {ToolPanelDom}
-        </body>
+        </div>
     );
 };
