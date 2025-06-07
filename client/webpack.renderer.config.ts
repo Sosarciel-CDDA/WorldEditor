@@ -17,11 +17,6 @@ export const rendererConfig: Configuration = {
   plugins,
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css'],
-    alias:{
-      BridgeHelper: path.resolve(__dirname, 'src/BridgeHelper'),
-      '@/src': path.resolve(__dirname, 'src'),
-      '@': path.resolve(__dirname, '.'),
-    },
     plugins: [new TsconfigPathsPlugin({
       configFile: './tsconfig.json'
     })],

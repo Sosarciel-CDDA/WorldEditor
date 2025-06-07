@@ -1,4 +1,4 @@
-import { CHUNK_SIZE } from "@/src/compoent/GlobalContext";
+import { CHUNK_SIZE } from "@/src/Frontend/GlobalContext";
 import { PRecord } from "@zwa73/utils";
 import { Chunk, ChunkSlotDataMap } from "./Chunk";
 import { TileSlotPos, TileSlotData } from "./TileSlot";
@@ -38,7 +38,7 @@ export class ZoneMap extends PixiNode<ZoneMap,Chunk,ZoneChunkDataMap>{
     constructor(props:ZoneMapProps){
         super(props.chunkDataMap??{});
         this.pos = props.pos;
-        this.init();
+        void this.init();
     }
     getSlotByWorldPos(x:number,y:number,z:number=this.currZ){
         const pos = this.parseGlobalPos(x,y);

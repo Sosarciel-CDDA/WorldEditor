@@ -1,4 +1,4 @@
-import { SpriteData } from "@/src/static/TilesetLoader";
+import { SpriteData } from "@/src/Backend/TilesetLoader";
 import * as PIXI from 'pixi.js';
 import { TileSlotPos } from "../TileSlot";
 import { getSpriteTexture } from "../../Util";

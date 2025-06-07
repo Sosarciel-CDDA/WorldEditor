@@ -1,5 +1,5 @@
 import React, { forwardRef, Ref, useContext, useEffect, useState } from "react";
-import { GlobalContext, InitData } from "@/src/compoent/GlobalContext";
+import { GlobalContext, InitData } from "@/src/Frontend/GlobalContext";
 import { Card } from '@zwa73/react-utils';
 import { css } from "styled-components";
 import { CanvasPanelRef } from "../../CanvasPanel";

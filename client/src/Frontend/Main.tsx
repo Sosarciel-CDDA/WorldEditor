@@ -1,6 +1,6 @@
 import { FC, useCallback, useContext, useRef, useState } from "react";
 import { InputCard } from "./InputCard";
-import { BridgeProxy } from "BridgeHelper";
+import { BridgeProxy } from "ContextProxy";
 import { GlobalContext, InitData } from "./GlobalContext";
 import { ToolPanel, ToolPanelDom } from "./ToolPanel";
 import { CanvasPanelRef, CanvasPanelDom } from "./CanvasPanel";

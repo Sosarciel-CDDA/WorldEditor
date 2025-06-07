@@ -1,6 +1,6 @@
 import React, { createContext, useState, ReactNode } from 'react';
-import { TilesetData } from '@/src/static/TilesetLoader';
-import { GameDataTable } from '@/src/static/DataLoader';
+import { TilesetData } from '@/src/Backend/TilesetLoader';
+import { GameDataTable } from '@/src/Backend/DataLoader';
 import { PRecord } from '@zwa73/utils';
 
 

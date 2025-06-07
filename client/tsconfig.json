@@ -13,11 +13,13 @@
     "resolveJsonModule": true,
     "strict": true,
     "paths": {
-      "BridgeHelper": ["./src/BridgeHelper"],
-			"@/src/*"     : ["./src/*"],
-			"@/*"         : ["./*"],
-			"@"           : ["./src/index"],
-      "*": ["node_modules/*"],
+			"*": ["node_modules/*"],
+      "@/src/*": ["./src/*"],
+      "@/*": ["./*"],
+      "@": ["./src/index"],
+      "Backend" : ["src/Backend"],
+      "Frontend": ["./src/Frontend"],
+      "ContextProxy": ["./src/Frontend/ContextProxy"]
     },
     "jsx": "react-jsx"
   },

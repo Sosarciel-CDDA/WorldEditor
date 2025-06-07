@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
-import { Main } from './compoent/Main';
-import { GlobalProvider } from './compoent/GlobalContext';
+import { Main } from './Frontend/Main';
+import { GlobalProvider } from './Frontend/GlobalContext';
 import { UtilRT } from '@zwa73/react-utils';
 
 UtilRT.setStyleVar(document.documentElement,{
