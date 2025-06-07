@@ -1,5 +1,5 @@
 {
-  "name": "@sosarciel-cdda/cdda-worldeditor",
+  "name": "@sosarciel-cdda/worldeditor",
   "version": "1.0.0",
   "description": "world editor",
   "main": "index.js",

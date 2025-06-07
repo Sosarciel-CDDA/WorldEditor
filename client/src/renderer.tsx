@@ -18,4 +18,4 @@ root.render(
 <Main/>
 </GlobalProvider>
 );
-//    <Image src={`F:/Sosarciel/CDDA/CDDA-WorldEditor/data/normal_fields.png`} alt="Tileset Image" />
+//    <Image src={`F:/Sosarciel/CDDA/WorldEditor/data/normal_fields.png`} alt="Tileset Image" />

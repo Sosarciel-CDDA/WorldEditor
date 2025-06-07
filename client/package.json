@@ -1,5 +1,5 @@
 {
-  "name": "client",
+  "name": "@sosarciel-cdda/worldeditor-client",
   "productName": "client",
   "version": "1.0.0",
   "description": "My Electron application description",
@@ -29,7 +29,7 @@
     "@typescript-eslint/parser": "^5.62.0",
     "@vercel/webpack-asset-relocator-loader": "^1.7.3",
     "css-loader": "^6.11.0",
-    "electron": "^31.3.1",
+    "electron": "31.3.1",
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
     "fork-ts-checker-webpack-plugin": "^7.3.0",
@@ -47,7 +47,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@sosarciel-cdda/cdda-schema": "file:../../Schema/build/sosarciel-cdda-cdda-schema-1.0.0.tgz",
+    "@sosarciel-cdda/schema": "^1.0.0",
     "@zwa73/react-utils": "^1.0.1",
     "@zwa73/utils": "*",
     "electron-squirrel-startup": "^1.0.1",
