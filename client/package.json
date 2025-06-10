@@ -9,7 +9,8 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx ."
+    "lint": "eslint --ext .ts,.tsx .",
+    "build": "electron-forge package"
   },
   "devDependencies": {
     "@electron-forge/cli": "7.4.0",
@@ -47,7 +48,7 @@
   "dependencies": {
     "@sosarciel-cdda/schema": "file:../../Schema/build/sosarciel-cdda-schema-1.0.0.tgz",
     "@zwa73/js-utils": "^1.0.27",
-    "@zwa73/react-utils": "^1.0.2",
+    "@zwa73/react-utils": "^1.0.3",
     "@zwa73/utils": "^1.0.223",
     "electron-squirrel-startup": "^1.0.1",
     "gettext-parser": "^8.0.0",

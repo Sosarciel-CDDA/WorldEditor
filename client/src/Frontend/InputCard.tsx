@@ -31,10 +31,10 @@ const OverlayStyle = css`
     border: 1px solid black;
     padding: 1px;
     white-space: nowrap; /* 防止换行 */
-    &:hover{
+    &&:hover{
         border: 1px solid black;
     }
-    & > *{
+    && > *{
         margin: 1px;
         padding: 1px;
     }
@@ -52,25 +52,21 @@ const Input = styled.input<DynStyleable>`
     ${parseDynStyle}
 `;
 const ButtonStyle = css`
-    padding: 0px 0px;
-    margin: 0px 0px;
     border: 1px solid #000000;
     width: 20%;
-    font-size: 80%;
+    font-size: 0.8rem;
     height: 20px;
     overflow: hidden;
     text-overflow: ellipsis;
-    box-sizing: border-box; /* 确保 padding 和 border 包含在总尺寸内 */
-    &:hover{
+    &&:hover{
         border: 1px solid #000000;
     }
 `;
-const TextDiv = styled.div<DynStyleable>`
-    font-size: 12px;
+const TextStyle = css`
+    font-size: 0.8rem;
     width: 20%;
     overflow: hidden;
     text-overflow: ellipsis;
-    ${parseDynStyle}
 `;
 
 export const InputCard = forwardRef((props: InputDialogProps, ref: Ref<InputCard>)=>{
@@ -90,7 +86,10 @@ export const InputCard = forwardRef((props: InputDialogProps, ref: Ref<InputCard
 
     return (
         <Card cardStyle={OverlayStyle.concat(overlayStyle)}>
-            <TextDiv $dynstyle={descStyle}>{desc}</TextDiv>
+            <Card
+                cardStyle={TextStyle.concat(descStyle)}
+                tooltip="游戏路径"
+            >{desc}</Card>
             <Input
                 $dynstyle={inputStyle}
                 type="text"
