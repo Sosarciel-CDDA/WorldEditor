@@ -2,8 +2,8 @@ import { FC, useCallback, useContext, useRef, useState } from "react";
 import { InputCard } from "./InputCard";
 import { BridgeProxy } from "ContextProxy";
 import { GlobalContext, InitData } from "./GlobalContext";
-import { ToolPanel, ToolPanelDom } from "./ToolPanel";
-import { CanvasPanelRef, CanvasPanelDom } from "./CanvasPanel";
+import { ToolPanelDom } from "./ToolPanel";
+import { CanvasPanelDom } from "./CanvasPanel";
 import { css } from "styled-components";
 import { remapOMTerrainID } from "./Util";
 
@@ -27,7 +27,7 @@ export const Main:FC = ()=>{
             if (!inputDialogRef.current) return;
             //const text = inputDialogRef.current.getText();
             //const text = "H:/CDDA/cdda-windows-tiles-x64-2023-05-08-0608/";
-            const text = "H:/CDDA/newver11/cdda-windows-tiles-sounds-x64-2024-07-02-0131";
+            const text = "H:/CDDA/newver11/cdda-windows-with-graphics-x64-2025-09-04-1735";
             setInputVisible(false);
 
             console.time('client init');
