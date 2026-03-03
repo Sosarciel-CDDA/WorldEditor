@@ -1,4 +1,4 @@
-import type { AnyMapgen, Mapgen, OverMapSpecial, OvermapTerrainID, Palette, TerrainID } from "@sosarciel-cdda/schema";
+import type { AnyMapgen, Mapgen, OverMapSpecial, OvermapTerrainID, Palette } from "@sosarciel-cdda/schema";
 import { CHUNK_SIZE } from "./GlobalContext";
 import type { GameDataTable } from "Backend";
 import { ChunkSlotDataMap } from "./TileMap/Chunk";
@@ -141,8 +141,16 @@ export const getChunkSlotData = (id:OvermapTerrainID,gd:GameDataTable,td:Tileset
 
             //地形
             const tid = getPaletteToF('terrain',char,palette);
-            if(tid!=null) slot.terrain = td.table[tid]??{tileId:tid};
-            else if(fillid!=null) slot.terrain = td.table[fillid]??{tileId:fillid};
+            //如果有id
+            if(tid!=null){
+                const fxid = gd.Terrain[tid]?.looks_like ?? tid;
+                slot.terrain = td.table[fxid] ?? {tileId:fxid};
+            }
+            //如果未定义则尝试使用填充id
+            else if(fillid!=null){
+                const fxid = gd.Terrain[fillid]?.looks_like ?? fillid;
+                slot.terrain = td.table[fxid]??{tileId:fxid};
+            }
             else pwarn(`can't find "${char}" in palette`);
 
             //家具

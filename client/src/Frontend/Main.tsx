@@ -32,7 +32,7 @@ export const Main:FC = ()=>{
 
             console.time('client init');
             const [tilesetData,gameData,i18n] = await Promise.all([
-                BridgeProxy.loadTileset(text,'MshockXotto+'),
+                BridgeProxy.loadTileset(text,'MSX++UnDeadPeopleEdition'),
                 BridgeProxy.loadGameData(text),
                 BridgeProxy.loadI18NData(text,'zh_CN'),
             ]);

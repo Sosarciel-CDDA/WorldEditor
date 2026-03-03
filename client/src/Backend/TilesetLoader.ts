@@ -1,7 +1,6 @@
 import { SLogger, UtilFT } from '@zwa73/utils';
 import fs from 'fs';
 import path from 'pathe';
-import Jimp from 'jimp';
 import { IpcMainInvokeEvent } from 'electron';
 
 type TilesetJson = {
@@ -50,7 +49,7 @@ export type SpriteData = {
 };
 async function getPngSize(filePath:string) {
     return new Promise<{ width:number, height:number }>((resolve, reject) => {
-        const buffer = Buffer.alloc(24);
+        const buffer = Buffer.alloc(24) as any;
         fs.open(filePath, 'r', (err, fd) => {
             if (err) return reject(err);
             fs.read(fd, buffer, 0, 24, 0, (err) => {

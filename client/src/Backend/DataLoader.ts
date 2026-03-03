@@ -1,12 +1,12 @@
 import { AnyFunc, PRecord, UtilFT } from "@zwa73/utils";
-import { AnyCddaJson, AnyItem, AnyMapgen, Furniture, Monster, OverMapSpecial, Palette, Terrain } from "@sosarciel-cdda/schema";
+import { AnyCddaJson, Item, AnyMapgen, Furniture, Monster, OverMapSpecial, Palette, Terrain } from "@sosarciel-cdda/schema";
 import { app, IpcMainInvokeEvent } from "electron";
 import path from "pathe";
 
 
 
 export type GameDataTable = {
-    Item:PRecord<string,AnyItem>;
+    Item:PRecord<string,Item>;
     Terrain:PRecord<string,Terrain>;
     OvermapSpecial:PRecord<string,OverMapSpecial>;
     Mapgen:AnyMapgen[];
@@ -71,23 +71,13 @@ export async function loadGameData(e:IpcMainInvokeEvent|undefined,gamePath:strin
         Furniture:{}
     };
 
-    //#region match
-    const addItem = (item:AnyItem)=>out.Item[item.id] = item;
-    const addAnyItem:{[P in AnyItem['type']]:typeof addItem}={
-        'GENERIC':addItem,'AMMO':addItem,
-        'ARMOR':addItem,'COMESTIBLE':addItem,
-        'GUN':addItem,'GUNMOD':addItem,
-        'MAGAZINE':addItem,'TOOL':addItem,
-    };
-    //#endregion
-
     for(const json of baseJsons){
         if(typeof json != 'object') continue;
         const fixJsonList = Array.isArray(json)
             ? json : [json];
         for(const data of fixJsonList){
             matchTypeProc(data,{
-                ...addAnyItem,
+                "ITEM":t=>out.Item[t.id] = t,
                 "terrain":t=>out.Terrain[t.id] = t,
                 'overmap_special':t=>out.OvermapSpecial[t.id] = t,
                 'mapgen':t=>out.Mapgen.push(t),
