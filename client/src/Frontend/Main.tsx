@@ -27,12 +27,12 @@ export const Main:FC = ()=>{
             if (!inputDialogRef.current) return;
             //const text = inputDialogRef.current.getText();
             //const text = "H:/CDDA/cdda-windows-tiles-x64-2023-05-08-0608/";
-            const text = "H:/CDDA/newver11/cdda-windows-with-graphics-x64-2025-09-04-1735";
+            const text = "H:/CDDA/newver11/cdda-windows-with-graphics-and-sounds-x64-2025-12-01-0424";
             setInputVisible(false);
 
             console.time('client init');
             const [tilesetData,gameData,i18n] = await Promise.all([
-                BridgeProxy.loadTileset(text,'MSX++UnDeadPeopleEdition'),
+                BridgeProxy.loadTileset(text,'MshockXotto+'),
                 BridgeProxy.loadGameData(text),
                 BridgeProxy.loadI18NData(text,'zh_CN'),
             ]);
