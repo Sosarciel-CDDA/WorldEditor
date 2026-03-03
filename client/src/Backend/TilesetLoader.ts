@@ -1,11 +1,13 @@
 import { SLogger, UtilFT } from '@zwa73/utils';
 import fs from 'fs';
 import path from 'pathe';
-import { IpcMainInvokeEvent } from 'electron';
+import { app, IpcMainInvokeEvent } from 'electron';
 import sharp from 'sharp';
 
 /** 设定 WebGL/显卡 允许的最大纹理限制，一般设为 4096 兼容性最好 */
 const MAX_TEXTURE_SIZE = 4096; 
+
+const approot = app==undefined ? process.cwd() : app.getAppPath();
 
 // ==========================================
 // 类型定义区
@@ -116,6 +118,8 @@ async function getPngSize(filePath: string) {
 export const loadTileset = async (e: IpcMainInvokeEvent | undefined, gamePath: string, gfxName: string): Promise<TilesetData> => {
     console.time('static loadTileset');
     const gfxDir = path.join(gamePath, 'gfx', gfxName);
+    const gfxCacheDir =  path.join(approot,'cache',gfxName);
+    await UtilFT.ensurePathExists(gfxCacheDir,{dir:true});
 
     // --------------------------------------------------------
     // 【阶段 1：读取并解析基础配置】
@@ -166,8 +170,7 @@ export const loadTileset = async (e: IpcMainInvokeEvent | undefined, gamePath: s
 
             for (let c = 0; c < chunksCount; c++) {
                 // 生成带编号的切片路径，如: player_chunk_0.png
-                const chunkRelativePath = path.join(parsedPath.dir, `${parsedPath.name}_chunk_${c}${parsedPath.ext}`);
-                const chunkPath = path.join(gfxDir, chunkRelativePath);
+                const chunkPath = path.join(gfxCacheDir, `${parsedPath.name}_chunk_${c}${parsedPath.ext}`);
 
                 // 计算当前切片的高度 (最后一块通常达不到 chunkPixelHeight，所以取最小值)
                 const extractHeight = Math.min(chunkPixelHeight, imageHeight! - c * chunkPixelHeight);
