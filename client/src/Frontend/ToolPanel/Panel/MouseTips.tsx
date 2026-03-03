@@ -68,7 +68,7 @@ const _MouseTips = forwardRef(((props:{},ref:Ref<MouseTips>)=>{
                     displayText += `terrain_id: ${gameId}\n`;
                     return;
                 }
-                const name = getTextByDesc(gameDat.name);
+                const name = getTextByDesc(gameDat.name??'未定义的描述');
                 displayText +=
                     `terrain_id: ${gameDat.id}\n`+
                     `terrain_name: ${name}\n`+

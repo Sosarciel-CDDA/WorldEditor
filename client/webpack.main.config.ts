@@ -19,4 +19,8 @@ export const mainConfig: Configuration = {
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json'],
   },
+  externals: {
+    // 告诉 Webpack 把 sharp 当作 commonjs 模块原样引入，不要将其打包进 index.js
+    sharp: 'commonjs sharp' 
+  },
 };

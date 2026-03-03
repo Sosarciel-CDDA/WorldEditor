@@ -144,18 +144,21 @@ export const getChunkSlotData = (id:OvermapTerrainID,gd:GameDataTable,td:Tileset
             //如果有id
             if(tid!=null){
                 const fxid = gd.Terrain[tid]?.looks_like ?? tid;
-                slot.terrain = td.table[fxid] ?? {tileId:fxid};
+                slot.terrain = td.table[tid] ?? td.table[fxid] ?? {tileId:fxid};
             }
             //如果未定义则尝试使用填充id
             else if(fillid!=null){
                 const fxid = gd.Terrain[fillid]?.looks_like ?? fillid;
-                slot.terrain = td.table[fxid]??{tileId:fxid};
+                slot.terrain = td.table[fillid] ?? td.table[fxid] ?? {tileId:fxid};
             }
             else pwarn(`can't find "${char}" in palette`);
 
             //家具
             const fid = getPaletteToF('furniture',char,palette);
-            if(fid!=null) slot.furniture = td.table[fid]??{tileId:fid};
+            if(fid!=null){
+                const fxid = gd.Furniture[fid]?.looks_like ?? fid;
+                slot.furniture = td.table[fid] ?? td.table[fxid] ?? {tileId:fid};
+            }
 
             outmap[`${x}_${y}`] = slot;
         }
